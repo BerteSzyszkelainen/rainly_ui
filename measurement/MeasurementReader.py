@@ -30,4 +30,5 @@ class MeasurementReader(object):
 if __name__ == "__main__":
     measurementReader = MeasurementReader(interval=10)
     timestamp, rainfall = measurementReader.read()
-    print("Measurement reader executed successfully. Time: {} Measurement: {}.".format(timestamp, rainfall))
+    print("Measurement reader executed successfully.")
+    print("Data read, timestamp: {} measurement: {}.".format(timestamp, rainfall))

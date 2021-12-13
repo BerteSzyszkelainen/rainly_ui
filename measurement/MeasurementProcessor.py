@@ -11,8 +11,8 @@ class MeasurementProcessor(object):
     def run(self):
         measurementReader = MeasurementReader(interval=60)
         measurementWriter = MeasurementWriter(destination_file_path=r'C:\Users\szysz\rainly\rainfall.csv')
-        time, rainfall = measurementReader.read()
-        measurementWriter.save(time=time, measurement=rainfall)
+        timestamp, rainfall = measurementReader.read()
+        measurementWriter.save(timestamp=timestamp, measurement=rainfall)
 
 if __name__ == "__main__":
     measurementProcessor = MeasurementProcessor()
