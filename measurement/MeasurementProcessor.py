@@ -9,8 +9,8 @@ class MeasurementProcessor(object):
         pass
 
     def run(self):
-        measurementReader = MeasurementReader(interval=60)
-        measurementWriter = MeasurementWriter(destination_file_path=r'C:\Users\szysz\rainly\rainfall.csv')
+        measurementReader = MeasurementReader(interval=10)
+        measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/rainfall.csv')
         timestamp, rainfall = measurementReader.read()
         measurementWriter.save(timestamp=timestamp, measurement=rainfall)
 

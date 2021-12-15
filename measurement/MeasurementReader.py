@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import time
 from gpiozero import Button
-from utilities.utilities import waitFor
+from utilities import utilities
 
 
 class MeasurementReader(object):
@@ -21,7 +21,7 @@ class MeasurementReader(object):
         self.tip_count = 0
 
     def read(self):
-        waitFor(interval=self.interval)
+        utilities.waitFor(interval=self.interval)
         timestamp = time.strftime('"%Y-%m-%d %H:%M:%S')
         rainfall = self.tip_count * self.BUCKET_SIZE
         self.reset_rainfall()
