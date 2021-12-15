@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import time
 from measurement.MeasurementReader import MeasurementReader
 from measurement.MeasurementWriter import MeasurementWriter
 from utilities.utilities import isWholeHourByMinutes
@@ -13,10 +14,12 @@ class MeasurementProcessor(object):
         measurementReader = MeasurementReader(interval=60)
         measurementWriter = MeasurementWriter(destination_file_path=r'C:\Users\szysz\rainly\rainfall.csv')
 
-        if isWholeHourByMinutes():
-            while True:
-                date, time, rainfall = measurementReader.read()
-                measurementWriter.save(date=date, time=time, rainfall=rainfall)
+        while True:
+            if isWholeHourByMinutes():
+                while True:
+                    date, timestamp, rainfall = measurementReader.read()
+                    measurementWriter.save(date=date, timestamp=timestamp, rainfall=rainfall)
+            time.sleep(30)
 
 if __name__ == "__main__":
     measurementProcessor = MeasurementProcessor()
