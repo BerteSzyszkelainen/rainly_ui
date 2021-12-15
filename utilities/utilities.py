@@ -10,5 +10,4 @@ def waitFor(interval):
         time.sleep(secs=2)
 
 def isWholeHourByMinutes():
-    current_timestamp = datetime.datetime.now()
-    return datetime.datetime.fromtimestamp(current_timestamp).minute == 00
+    return datetime.datetime.now().minute == 0
