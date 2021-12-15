@@ -1,7 +1,11 @@
 #!/usr/bin/python3
-import time
+import datetime
+import locale
 from gpiozero import Button
 from utilities.utilities import waitFor
+
+
+locale.setlocale(locale.LC_ALL, "pl")
 
 
 class MeasurementReader(object):
@@ -22,10 +26,12 @@ class MeasurementReader(object):
 
     def read(self):
         waitFor(interval=self.interval)
-        timestamp = time.strftime('"%Y-%m-%d %H:%M:%S')
+        current_timestamp = datetime.datetime.now()
+        date = current_timestamp.strftime("%d %B %Y")
+        time = current_timestamp.strftime("%H:%M:%S")
         rainfall = self.tip_count * self.BUCKET_SIZE
         self.reset_rainfall()
-        return timestamp, round(rainfall, 2)
+        return date, time, round(rainfall, 2)
 
 if __name__ == "__main__":
     measurementReader = MeasurementReader(interval=10)

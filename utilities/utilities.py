@@ -1,3 +1,4 @@
+import datetime
 import time
 
 def waitFor(interval):
@@ -5,3 +6,7 @@ def waitFor(interval):
     while time.time() - start_time <= interval:
         print("Measurement in process...")
         time.sleep(secs=2)
+
+def isWholeHourByMinutes():
+    current_timestamp = datetime.datetime.now()
+    return datetime.datetime.fromtimestamp(current_timestamp).minute == 00
