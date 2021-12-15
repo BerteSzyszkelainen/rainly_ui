@@ -10,9 +10,9 @@ class MeasurementWriter:
 
     def save(self, date, timestamp, rainfall):
 
-        with open(self.destination_file_path, newline='', mode="a") as file:
+        with open(self.destination_file_path, newline='', mode="a+") as file:
             csv_writer = csv.writer(file, delimiter=',')
-            sniffer = csv.Sniffer()
+            sniffer = csv.Sniffer().sniff(file.readline())
             has_header = sniffer.has_header(file.read(2048))
             if not has_header:
                 csv_writer.write_row(self.HEADER)
