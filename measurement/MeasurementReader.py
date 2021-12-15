@@ -2,7 +2,7 @@
 import datetime
 import locale
 from gpiozero import Button
-from utilities.utilities import waitFor
+from utilities import utilities
 
 
 locale.setlocale(locale.LC_ALL, "pl")
@@ -25,7 +25,7 @@ class MeasurementReader(object):
         self.tip_count = 0
 
     def read(self):
-        waitFor(interval=self.interval)
+        utilities.waitFor(interval=self.interval)
         current_timestamp = datetime.datetime.now()
         date = current_timestamp.strftime("%d %B %Y")
         time = current_timestamp.strftime("%H:%M:%S")
