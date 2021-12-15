@@ -20,7 +20,7 @@ class MeasurementWriter:
             csv_writer.writerow(row_to_save)
 
 if __name__ == "__main__":
-    measurementWriter = MeasurementWriter(destination_file_path=r'C:\Users\szysz\rainly\test\test_rainfall.csv')
+    measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/test/test_rainfall.csv')
     date, timestamp, rainfall = '12 grudzień 2021', '13:50:00', '10 mm'
     measurementWriter.save(date=date, timestamp=timestamp, rainfall=rainfall)
     print("Measurement writer executed successfully.")

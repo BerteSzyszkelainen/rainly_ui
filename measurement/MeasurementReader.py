@@ -5,7 +5,7 @@ from gpiozero import Button
 from utilities import utilities
 
 
-locale.setlocale(locale.LC_ALL, "pl")
+locale.setlocale(locale.LC_ALL, "pl_PL.UTF-8")
 
 
 class MeasurementReader(object):
