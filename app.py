@@ -45,34 +45,7 @@ app.layout = html.Div(children=[
             28: '28d'
         },
         value=1,
-    ),
-    html.Div(children=[
-        dcc.Graph(id='monthly-rainfall', style={'width': '50%', 'height': '50%', 'display': 'inline-block'}),
-        html.H3(id='monthly-rainfall-sum', style={'width': '50%', 'height': '50%', 'display': 'inline-block', 'text-align': 'center'})
-    ]),
-    html.Label('Wybierz zakres miesięcy', style={'font-size': '20px'}),
-    dcc.RangeSlider(
-        id='monthly-rainfall-range-slider',
-        min=0,
-        max=11,
-        step=None,
-        marks={
-            0: 'styczeń',
-            1: 'luty',
-            2: 'marzec',
-            3: 'kwiecień',
-            4: 'maj',
-            5: 'czerwiec',
-            6: 'lipiec',
-            7: 'sierpień',
-            8: 'wrzesień',
-            9: 'październik',
-            10: 'listopad',
-            11: 'grudzień'
-        },
-        value=[0, 1],
     )
-
 ])
 
 @app.callback(
@@ -80,14 +53,17 @@ app.layout = html.Div(children=[
     Input('daily-rainfall-slider', 'value')
 )
 def update_daily_rainfall_figure(selected_time_range):
-    filtered_df = df.iloc[-selected_time_range:]
+
+    result = df.groupby(["day", "month"], as_index=False).sum()
+    filtered_df = result.iloc[:selected_time_range]
+
     fig = px.bar(filtered_df,
-                 x='time',
+                 x='day',
                  y='rainfall',
-                 color='color',
                  title="Suma opadów / dzień")
     fig.update_layout(yaxis_range=[0, 20])
     fig.update_layout(xaxis_title="Dzień")
+    fig.update_layout(xaxis_dtick="n")
     fig.update_layout(yaxis_title="mm")
     fig.update_layout(showlegend=False)
     fig.update_layout(transition_duration=500)
@@ -105,75 +81,11 @@ def update_daily_rainfall_figure(selected_time_range):
     Input(component_id='daily-rainfall-slider', component_property='value')
 )
 def update_daily_rainfall_sum(selected_time_range):
-    filtered_df = df.iloc[-selected_time_range:]
-    return 'Suma opadów / wybrany okres: {} mm'.format(filtered_df['rainfall'].sum())
 
-@app.callback(
-    Output('monthly-rainfall', 'figure'),
-    Input('monthly-rainfall-range-slider', 'value')
-)
-def update_monthly_rainfall_figure(selected_time_range):
-    df_month = df['time'].str.split('.', expand=True)[1]
-    tmpDF = pd.concat([df_month, df['rainfall']], axis=1, keys=["month", "rainfall"])
+    tmpDF = pd.DataFrame(df, columns=["day", "month", "rainfall"])
+    result = tmpDF.groupby(["day", "month"], as_index=False).sum()
 
-    tmpDF = tmpDF.groupby(['month'], as_index=False)["rainfall"].sum()
-    tmpDF = tmpDF.replace({'01': 'styczeń',
-                           '02': 'luty',
-                           '03': 'marzec',
-                           '04': 'kwiecień',
-                           '05': 'maj',
-                           '06': 'czerwiec',
-                           '07': 'lipiec',
-                           '08': 'sierpień',
-                           '09': 'wrzesień',
-                           '10': 'październik',
-                           '11': 'listopad',
-                           '12': 'grudzień',
-                           })
-    filtered_df = tmpDF.iloc[selected_time_range[0]:selected_time_range[1]+1]
-
-    fig = px.bar(filtered_df,
-                 x='month',
-                 y='rainfall',
-                 title="Suma opadów / miesiąc",
-                 )
-    fig.update_layout(yaxis_range=[0, 200])
-    fig.update_layout(xaxis_title="Miesiąc")
-    fig.update_layout(yaxis_title="mm")
-    fig.update_layout(showlegend=False)
-    fig.update_layout(transition_duration=500)
-    fig.update_layout(
-        title={
-            'y': 0.9,
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top'})
-
-    return fig
-
-@app.callback(
-    Output(component_id='monthly-rainfall-sum', component_property='children'),
-    Input(component_id='monthly-rainfall-range-slider', component_property='value')
-)
-def update_monthly_rainfall_sum(selected_time_range):
-    df_month = df['time'].str.split('.', expand=True)[1]
-    tmpDF = pd.concat([df_month, df['rainfall']], axis=1, keys=["month", "rainfall"])
-
-    tmpDF = tmpDF.groupby(['month'], as_index=False)["rainfall"].sum()
-    tmpDF = tmpDF.replace({'01': 'styczeń',
-                           '02': 'luty',
-                           '03': 'marzec',
-                           '04': 'kwiecień',
-                           '05': 'maj',
-                           '06': 'czerwiec',
-                           '07': 'lipiec',
-                           '08': 'sierpień',
-                           '09': 'wrzesień',
-                           '10': 'październik',
-                           '11': 'listopad',
-                           '12': 'grudzień',
-                           })
-    filtered_df = tmpDF.iloc[selected_time_range[0]:selected_time_range[1] + 1]
+    filtered_df = result.iloc[:selected_time_range]
     return 'Suma opadów / wybrany okres: {} mm'.format(filtered_df['rainfall'].sum())
 
 @app.callback(Output('timer', 'children'),
