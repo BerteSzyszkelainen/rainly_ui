@@ -25,16 +25,19 @@ class MeasurementReader(object):
         self.tip_count = 0
 
     def read(self):
-        utilities.waitFor(interval=self.interval)
         current_timestamp = datetime.datetime.now()
-        date = current_timestamp.strftime("%d %B %Y")
-        time = current_timestamp.strftime("%H:%M:%S")
+        year = current_timestamp.strftime("%Y")
+        month = current_timestamp.strftime("%B")
+        day = current_timestamp.strftime("%d")
+        clock_time = current_timestamp.strftime("%H:%m")
+        utilities.waitFor(interval=self.interval)
         rainfall = self.tip_count * self.BUCKET_SIZE
         self.reset_rainfall()
-        return date, time, round(rainfall, 2)
+        return year, month, day, clock_time, round(rainfall, 2)
 
 if __name__ == "__main__":
     measurementReader = MeasurementReader(interval=10)
-    timestamp, rainfall = measurementReader.read()
+    year, month, day, clock_time, rainfall = measurementReader.read()
     print("Measurement reader executed successfully.")
-    print("Data read, timestamp: {} measurement: {}.".format(timestamp, rainfall))
+    print("year: {} month: {} day: {} clock_time: {} rainfall: {}"
+          .format(year, month, day, clock_time, rainfall))

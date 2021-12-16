@@ -1,1 +1,1 @@
-date,timestamp,rainfall
+year,month,day,clock_time,rainfall
