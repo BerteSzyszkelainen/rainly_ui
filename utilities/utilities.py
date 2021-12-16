@@ -7,7 +7,5 @@ def waitFor(interval):
         print("Measurement in process...")
         time.sleep(2)
 
-        time.sleep(secs=2)
-
 def isWholeHourByMinutes():
     return datetime.datetime.now().minute == 0
