@@ -31,13 +31,11 @@ class MeasurementReader(object):
         day = current_timestamp.strftime("%d")
         clock_time = current_timestamp.strftime("%H:%m")
         utilities.waitFor(interval=self.interval)
-        rainfall = self.tip_count * self.BUCKET_SIZE
+        rainfall = round(self.tip_count * self.BUCKET_SIZE, 2)
+        print("Successfully read data, rainfall: {}".format(rainfall))
         self.reset_rainfall()
-        return year, month, day, clock_time, round(rainfall, 2)
+        return year, month, day, clock_time, rainfall
 
 if __name__ == "__main__":
     measurementReader = MeasurementReader(interval=10)
-    year, month, day, clock_time, rainfall = measurementReader.read()
-    print("Measurement reader executed successfully.")
-    print("year: {} month: {} day: {} clock_time: {} rainfall: {}"
-          .format(year, month, day, clock_time, rainfall))
+    measurementReader.read()

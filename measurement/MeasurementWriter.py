@@ -13,6 +13,8 @@ class MeasurementWriter:
             row_to_save = [year, month, day, clock_time, rainfall]
             csv_writer.writerow(row_to_save)
 
+        print("Successfully saved data.")
+
 if __name__ == "__main__":
     measurementWriter = MeasurementWriter(destination_file_path=r'C:\Users\szysz\rainly\test\test_rainfall.csv')
     measurementWriter.save(year="2021",
@@ -20,4 +22,3 @@ if __name__ == "__main__":
                            day="16",
                            clock_time="18:00",
                            rainfall="10 mm")
-    print("Measurement writer executed successfully.")
