@@ -1,0 +1,24 @@
+*{
+  font-family: "Lucida Console"
+}
+
+body {
+    background-color: #001f3f;
+    margin: 5%;
+    color: orange;
+}
+
+.text-div {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 25px;
+}
+
+.container {
+    height: 450px;
+    color: black;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
