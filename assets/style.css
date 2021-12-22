@@ -14,11 +14,39 @@ body {
     font-size: 25px;
 }
 
+#timer {
+    font-size: 25px;
+}
+
+.timer-div {
+    text-align: right;
+}
+
+.title-div {
+    text-align: center;
+}
+
+.title-label {
+    font-size: 35px;
+}
+
+.label-select-range {
+   font-size: 25px;
+}
+
 .container {
-    height: 450px;
+    height: 800px;
     color: black;
     background-color: white;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.label-rainfall-sum {
+  white-space: pre-wrap
+}
+
+#daily-rainfall-slider {
+   font-size: 35px;
 }

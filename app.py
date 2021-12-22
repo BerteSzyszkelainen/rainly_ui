@@ -8,15 +8,19 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 
+from utilities.utilities import generate_slider_marks
+
 app = dash.Dash(__name__)
 locale.setlocale(locale.LC_ALL, 'pl_PL.UTF-8')
 
 df = pd.read_csv('rainfall.csv')
+df_sum_per_day = df.groupby(["day", "month"], as_index=False).sum()
+measured_days_count = df['day'].nunique()
 
 app.layout = html.Div(className="root-div",
     children=[
     html.Div(className="timer-div", children=[
-        html.H3(id='timer', style={'text-align': 'right'}),
+        html.Label(id='timer'),
         dcc.Interval(
             id='interval-component',
             interval=1 * 1000,
@@ -24,36 +28,29 @@ app.layout = html.Div(className="root-div",
         )
     ]),
     html.Div(className="title-div", children=[
-        html.H1(children='Rainly',
-                style={
-                    'textAlign': 'center',
-                }
-                ),
+        html.Br(),
+        html.Br(),
+        html.Label(className="title-label", children='Rainly'),
+        html.Br(),
+        html.Br(),
         html.Br()
     ]),
     html.Div(className="container", children=[
         html.Div(className="graph-div", children=[dcc.Graph(id='daily-rainfall')]),
-        html.Div(className="text-div", children=[html.Label('Suma opadów / wybrany okres'), html.H3(id='daily-rainfall-sum')]),
+        html.Div(className="text-div", children=[html.Label(className="label-rainfall-sum", children='Suma opadów / wybrany okres'), html.Label(id='daily-rainfall-sum')]),
     ]),
     html.Div(className="slider-div", children=[
         html.Br(),
         html.Br(),
-        html.Label('Wybierz zakres dni', style={'font-size': '20px'}),
+        html.Label(className="label-select-range", children='Wybierz zakres dni'),
         html.Br(),
         html.Br(),
         dcc.Slider(
             id='daily-rainfall-slider',
             min=1,
-            max=28,
+            max=measured_days_count,
             step=None,
-            marks={
-                1: '1d',
-                3: '3d',
-                7: '7d',
-                14: '14d',
-                21: '21d',
-                28: '28d'
-            },
+            marks=generate_slider_marks(measured_days_count),
             value=1,
         )
     ])
@@ -65,15 +62,15 @@ app.layout = html.Div(className="root-div",
 )
 def update_daily_rainfall_figure(selected_time_range):
 
-    result = df.groupby(["day", "month"], as_index=False).sum()
-    filtered_df = result.iloc[:selected_time_range]
+    filtered_df = df_sum_per_day.iloc[:selected_time_range]
+    filtered_df["full date"] = filtered_df["day"].astype(str) + " " + filtered_df["month"]
 
     fig = px.bar(filtered_df,
-                 x='day',
+                 x='full date',
                  y='rainfall',
                  title="Suma opadów / dzień")
 
-    fig.update_layout(yaxis_range=[0, 20])
+    fig.update_layout(yaxis_range=[0, 35])
     fig.update_layout(xaxis_title="Dzień")
     fig.update_layout(xaxis_dtick="n")
     fig.update_layout(yaxis_title="mm")
@@ -94,10 +91,9 @@ def update_daily_rainfall_figure(selected_time_range):
 )
 def update_daily_rainfall_sum(selected_time_range):
 
-    result = df.groupby(["day", "month"], as_index=False).sum()
-    filtered_df = result.iloc[:selected_time_range]
+    filtered_df = df_sum_per_day.iloc[:selected_time_range]
 
-    return '{} mm'.format(round(filtered_df['rainfall'].sum(), 2))
+    return [html.Br(), html.Br(), '{} mm'.format(round(filtered_df['rainfall'].sum(), 2))]
 
 @app.callback(Output('timer', 'children'),
               [Input('interval-component', 'n_intervals')])
