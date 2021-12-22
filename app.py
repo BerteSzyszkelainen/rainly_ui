@@ -5,8 +5,8 @@ import dash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
 
 from utilities.utilities import generate_slider_marks
 
@@ -101,4 +101,4 @@ def update_timer(n):
       return str(datetime.now().strftime("%A, %#d %B %Y, %H:%M:%S"))
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0')

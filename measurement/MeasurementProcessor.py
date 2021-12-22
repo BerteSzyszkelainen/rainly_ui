@@ -12,7 +12,7 @@ class MeasurementProcessor(object):
 
     def run(self):
         measurementReader = MeasurementReader(interval=10)
-        measurementWriter = MeasurementWriter(destination_file_path=r'~/Projects/rainly/rainfall.csv')
+        measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/rainfall.csv')
 
         while True:
             #if isWholeHourByMinutes():
