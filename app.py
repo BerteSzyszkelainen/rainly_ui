@@ -17,9 +17,9 @@ df = pd.read_csv('rainfall.csv')
 df_sum_per_day = df.groupby(["day", "month"], as_index=False).sum()
 measured_days_count = df['day'].nunique()
 
-app.layout = html.Div(className="root-div",
+app.layout = html.Div(id="root-div",
     children=[
-    html.Div(className="timer-div", children=[
+    html.Div(id="timer-div", children=[
         html.Label(id='timer'),
         dcc.Interval(
             id='interval-component',
@@ -27,26 +27,17 @@ app.layout = html.Div(className="root-div",
             n_intervals=0
         )
     ]),
-    html.Div(className="title-div", children=[
-        html.Br(),
-        html.Br(),
-        html.Label(className="title-label", children='Rainly'),
-        html.Br(),
-        html.Br(),
-        html.Br()
+    html.Div(id="title-div", children=[
+        html.Label(id="title-label", children='Rainly')
     ]),
-    html.Div(className="container", children=[
-        html.Div(className="graph-div", children=[dcc.Graph(id='daily-rainfall')]),
-        html.Div(className="text-div", children=[html.Label(className="label-rainfall-sum", children='Suma opadów / wybrany okres'), html.Label(id='daily-rainfall-sum')]),
+    html.Div(id="container", children=[
+        html.Div(id="graph-div", children=[dcc.Graph(id="daily-rainfall")]),
+        html.Div(id="text-div", children=[html.Label(id="label-rainfall-sum", children="Suma opadów / wybrany okres"), html.Label(id="daily-rainfall-sum")]),
     ]),
-    html.Div(className="slider-div", children=[
-        html.Br(),
-        html.Br(),
-        html.Label(className="label-select-range", children='Wybierz zakres dni'),
-        html.Br(),
-        html.Br(),
+    html.Div(id="slider-div", children=[
+        html.Label(id="label-select-range", children='Wybierz zakres dni'),
         dcc.Slider(
-            id='daily-rainfall-slider',
+            id="daily-rainfall-slider",
             min=1,
             max=measured_days_count,
             step=None,
@@ -76,6 +67,9 @@ def update_daily_rainfall_figure(selected_time_range):
     fig.update_layout(yaxis_title="mm")
     fig.update_layout(showlegend=False)
     fig.update_layout(transition_duration=500)
+    fig.update_layout(plot_bgcolor="#2b6777")
+    fig.update_layout(paper_bgcolor="#2b6777")
+    fig.update_layout(font={"color": "white", "size": 25})
     fig.update_layout(
         title={
             'y': 0.9,
@@ -93,7 +87,7 @@ def update_daily_rainfall_sum(selected_time_range):
 
     filtered_df = df_sum_per_day.iloc[:selected_time_range]
 
-    return [html.Br(), html.Br(), '{} mm'.format(round(filtered_df['rainfall'].sum(), 2))]
+    return ['{} mm'.format(round(filtered_df['rainfall'].sum(), 2))]
 
 @app.callback(Output('timer', 'children'),
               [Input('interval-component', 'n_intervals')])
