@@ -3,12 +3,12 @@
 }
 
 body {
-    background-color: #001f3f;
+    background-color: #2b6777;
     margin: 5%;
     color: orange;
 }
 
-.text-div {
+#text-div {
     text-align: center;
     vertical-align: middle;
     font-size: 25px;
@@ -18,35 +18,50 @@ body {
     font-size: 25px;
 }
 
-.timer-div {
+#timer-div {
     text-align: right;
+    margin-bottom: 50px;
 }
 
-.title-div {
+#title-div {
     text-align: center;
+    margin-bottom: 50px;
 }
 
-.title-label {
+#title-label {
     font-size: 35px;
 }
 
-.label-select-range {
+#slider-div {
+    margin-top: 50px;
+}
+
+#label-select-range {
    font-size: 25px;
 }
 
-.container {
+#container {
     height: 800px;
-    color: black;
+    color: white;
     background-color: white;
-    display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #2b6777;
 }
 
-.label-rainfall-sum {
-  white-space: pre-wrap
+#label-rainfall-sum {
+  margin-top: 150px;
+  display: block;
+  font-size: 35px;
+}
+
+#daily-rainfall-sum {
+  margin-top: 30px;
+  display: block;
+  font-size: 35px;
 }
 
 #daily-rainfall-slider {
    font-size: 35px;
+   margin-top: 30px;
 }
