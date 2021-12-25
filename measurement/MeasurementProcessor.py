@@ -15,15 +15,15 @@ class MeasurementProcessor(object):
         measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/rainfall.csv')
 
         while True:
-            #if isWholeHourByMinutes():
-            #    while True:
-            year, month, day, clock_time, rainfall = measurementReader.read()
-            measurementWriter.save(year=year,
-                                   month=month,
-                                   day=day,
-                                   clock_time=clock_time,
-                                   rainfall=rainfall)
-            #time.sleep(30)
+            if isWholeHourByMinutes():
+                while True:
+                    year, month, day, clock_time, rainfall = measurementReader.read()
+                    measurementWriter.save(year=year,
+                                           month=month,
+                                           day=day,
+                                           clock_time=clock_time,
+                                           rainfall=rainfall)
+            time.sleep(30)
 
 if __name__ == "__main__":
     measurementProcessor = MeasurementProcessor()
