@@ -11,7 +11,7 @@ class MeasurementProcessor(object):
         pass
 
     def run(self):
-        measurementReader = MeasurementReader(interval=10)
+        measurementReader = MeasurementReader(interval=3600)
         measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/rainfall.csv')
 
         while True:
