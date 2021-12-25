@@ -13,7 +13,7 @@ def isWholeHourByMinutes():
 def generate_slider_marks(days_count):
 
     if days_count < 3:
-        marks = {i: {'label': '{}d'.format(i), 'style': {'font-size': 25, 'color': 'white'}} for i in range(days_count)}
+        marks = {i: {'label': '{}d'.format(i), 'style': {'font-size': 25, 'color': 'white'}} for i in range(1, days_count)}
     elif days_count < 7:
         marks = {i: {'label': '{}d'.format(i), 'style': {'font-size': 25, 'color': 'white'}} for i in [1, 2, 3]}
     elif days_count < 14:

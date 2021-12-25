@@ -40,7 +40,7 @@ app.layout = html.Div(id="root-div",
         html.Label(id="select-range-label", children='Wybierz zakres dni'),
         dcc.Slider(
             id="daily-rainfall-slider",
-            min=1,
+            min=0,
             max=min(DAY_COUNT, 28),
             step=None,
             marks=generate_slider_marks(DAY_COUNT),

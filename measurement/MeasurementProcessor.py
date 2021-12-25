@@ -16,14 +16,13 @@ class MeasurementProcessor(object):
 
         while True:
             if isWholeHourByMinutes():
-                while True:
-                    year, month, day, clock_time, rainfall = measurementReader.read()
-                    measurementWriter.save(year=year,
-                                           month=month,
-                                           day=day,
-                                           clock_time=clock_time,
-                                           rainfall=rainfall)
-            time.sleep(30)
+                year, month, day, clock_time, rainfall = measurementReader.read()
+                measurementWriter.save(year=year,
+                                       month=month,
+                                       day=day,
+                                       clock_time=clock_time,
+                                       rainfall=rainfall)
+            time.sleep(60)
 
 if __name__ == "__main__":
     measurementProcessor = MeasurementProcessor()

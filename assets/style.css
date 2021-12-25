@@ -34,6 +34,9 @@ body {
 
 #slider-div {
     margin-top: 50px;
+    position: center;
+    margin: 0 auto;
+    width: 50%;
 }
 
 #select-range-label {
@@ -49,6 +52,7 @@ body {
 
 #daily-rainfall-sum {
   margin-top: 30px;
+  margin-bottom: 90px;
   display: block;
   font-size: 35px;
   color: white;
