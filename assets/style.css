@@ -14,6 +14,15 @@ body {
     font-size: 25px;
 }
 
+#root-div-warning {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    font-size: 25px;
+}
+
 #timer {
     font-size: 25px;
 }
