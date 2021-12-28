@@ -1,0 +1,2 @@
+year,month,day,clock_time,rainfall
+2021,12,28,14:00,10.0

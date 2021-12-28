@@ -1,6 +1,9 @@
 import datetime
 import time
 
+import pandas as pd
+
+
 def waitFor(interval):
     start_time = time.time()
     while time.time() - start_time <= interval:
@@ -29,3 +32,10 @@ def generate_slider_marks(days_count):
         marks.update({days_count: {'label': '{}d'.format(days_count), 'style': {'font-size': 25, 'color': 'white'}}})
 
     return marks
+
+def get_rainfall_sum_per_day(data_source, day_count):
+    df = pd.read_csv(data_source)
+    df_sum_per_day = df.groupby(["day", "month", "year"], as_index=False) \
+        .sum() \
+        .sort_values(by=['year', 'month', 'day'])
+    return df_sum_per_day.iloc[-day_count:]
