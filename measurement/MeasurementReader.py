@@ -32,7 +32,7 @@ class MeasurementReader(object):
         year = current_timestamp.strftime("%Y")
         month = current_timestamp.strftime("%B")
         day = current_timestamp.strftime("%d")
-        clock_time = current_timestamp.strftime("%H:%M")
+        clock_time = current_timestamp.strftime("%H:%M:%S")
         print("Successfully read data, year: {}, month: {}, day: {}, clock_time: {},  rainfall: {}".format(year, month, day, clock_time, rainfall))
         return year, month, day, clock_time, rainfall
 

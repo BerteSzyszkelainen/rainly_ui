@@ -11,19 +11,16 @@ class MeasurementProcessor(object):
         pass
 
     def run(self):
-        measurementReader = MeasurementReader(interval=3600)
+        measurementReader = MeasurementReader(interval=300)
         measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/rainfall.csv')
 
         while True:
-            if isWholeHourByMinutes():
-                while True:
-                    year, month, day, clock_time, rainfall = measurementReader.read()
-                    measurementWriter.save(year=year,
-                                           month=month,
-                                           day=day,
-                                           clock_time=clock_time,
-                                           rainfall=rainfall)
-            time.sleep(60)
+            year, month, day, clock_time, rainfall = measurementReader.read()
+            measurementWriter.save(year=year,
+                                   month=month,
+                                   day=day,
+                                   clock_time=clock_time,
+                                   rainfall=rainfall)
 
 if __name__ == "__main__":
     measurementProcessor = MeasurementProcessor()
