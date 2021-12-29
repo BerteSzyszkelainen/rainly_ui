@@ -78,7 +78,7 @@ def update_bar_chart(day_count, n):
                      x=df["day"].apply(str) + " " + df["month"].apply(str),
                      y="rainfall",
                      title="Suma opadów / dzień")
-        fig.update_layout(yaxis_range=[0, 50])
+        fig.update_layout(yaxis_autorange=True)
         fig.update_layout(xaxis_title="Dzień")
         fig.update_layout(xaxis_dtick="n")
         fig.update_layout(yaxis_title="mm")
