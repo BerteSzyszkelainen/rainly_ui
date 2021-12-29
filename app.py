@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day
 
 app = dash.Dash(__name__)
-# locale.setlocale(locale.LC_ALL, 'pl_PL.UTF-8')
+server = app.server
 
 BACKGROUND_COLOR = "#5D5C61"
 MEASUREMENT_FILE_NAME = "rainfall.csv"
