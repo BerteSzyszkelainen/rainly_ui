@@ -75,7 +75,7 @@ def update_bar_chart(day_count, n):
     else:
         df = get_rainfall_sum_per_day(data_source='rainfall.csv', day_count=day_count)
         fig = px.bar(df,
-                     x=df["day"].apply(str) + " " + df["month"].apply(str),
+                     x=df["day"].apply(str) + " " + df["month"].apply(lambda row: row[:3]),
                      y="rainfall",
                      title="Suma opadów / dzień")
         fig.update_layout(yaxis_autorange=True)
