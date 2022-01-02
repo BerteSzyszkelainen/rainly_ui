@@ -1,15 +1,4 @@
-import datetime
-import time
-
 import pandas as pd
-
-
-def wait_for(interval):
-    start_time = time.time()
-    while time.time() - start_time <= interval:
-        print("Measurement in process...")
-        time.sleep(2)
-
 
 def generate_slider_marks(days_count):
     if days_count < 3:

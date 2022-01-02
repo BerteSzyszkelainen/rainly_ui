@@ -5,13 +5,13 @@ import plotly.express as px
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from be.utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day
 
 app = dash.Dash(__name__)
 server = app.server
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"http://localhost:5000/get_measurements"
+DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
 
 
 app.layout = html.Div(
