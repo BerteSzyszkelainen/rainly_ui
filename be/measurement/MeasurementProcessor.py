@@ -1,8 +1,6 @@
 #!/usr/bin/python3
-import time
-from measurement.MeasurementReader import MeasurementReader
-from measurement.MeasurementWriter import MeasurementWriter
-from utilities.utilities import isWholeHourByMinutes
+from be.measurement.MeasurementReader import MeasurementReader
+from be.measurement.MeasurementSender import MeasurementSender
 
 
 class MeasurementProcessor(object):
@@ -12,11 +10,11 @@ class MeasurementProcessor(object):
 
     def run(self):
         measurementReader = MeasurementReader(interval=300)
-        measurementWriter = MeasurementWriter(destination_file_path=r'/home/pi/Projects/rainly/rainfall.csv')
+        measurementSender = MeasurementSender(destination_url=r'http://localhost:5000/add_measurement')
 
         while True:
             year, month, day, clock_time, rainfall = measurementReader.read()
-            measurementWriter.save(year=year,
+            measurementSender.send(year=year,
                                    month=month,
                                    day=day,
                                    clock_time=clock_time,
@@ -25,4 +23,4 @@ class MeasurementProcessor(object):
 if __name__ == "__main__":
     measurementProcessor = MeasurementProcessor()
     measurementProcessor.run()
-    print("Measurement processor executed successfully.")
+    print("Measurement processor executed successfully!")

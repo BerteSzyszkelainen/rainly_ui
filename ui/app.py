@@ -1,5 +1,3 @@
-import locale
-import os
 from datetime import datetime
 import dash
 import pandas as pd
@@ -7,13 +5,14 @@ import plotly.express as px
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day
+from be.utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day
 
 app = dash.Dash(__name__)
 server = app.server
 
 BACKGROUND_COLOR = "#5D5C61"
-MEASUREMENT_FILE_NAME = "rainfall.csv"
+DATA_SOURCE = r"http://localhost:5000/get_measurements"
+
 
 app.layout = html.Div(
     id="root-div",
@@ -70,10 +69,12 @@ app.layout = html.Div(
 )
 def update_bar_chart(day_count, n):
 
-    if not os.path.exists(MEASUREMENT_FILE_NAME) or not os.path.getsize(MEASUREMENT_FILE_NAME):
+    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE,
+                                  day_count=day_count)
+
+    if df.empty:
         return {}, {'display': 'none'}
     else:
-        df = get_rainfall_sum_per_day(data_source='rainfall.csv', day_count=day_count)
         fig = px.bar(df,
                      x=df["day"].apply(str) + " " + df["month"].apply(lambda row: row[:3]),
                      y="rainfall",
@@ -114,10 +115,12 @@ def update_bar_chart(day_count, n):
 )
 def update_rainfall_sum(day_count, n):
 
-    if not os.path.exists(MEASUREMENT_FILE_NAME) or not os.path.getsize(MEASUREMENT_FILE_NAME):
+    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE,
+                                  day_count=day_count)
+
+    if df.empty:
         return None, {'display': 'none'}
     else:
-        df = get_rainfall_sum_per_day(data_source='rainfall.csv', day_count=day_count)
         return 'Suma: {} mm'.format(round(df['rainfall'].sum(), 2)), {'display': 'block'}
 
 
@@ -126,7 +129,10 @@ def update_rainfall_sum(day_count, n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
-    if not os.path.exists("rainfall.csv") or not os.path.getsize("rainfall.csv"):
+
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
         return {'display': 'block'}
     else:
         return {'display': 'none'}
@@ -140,10 +146,11 @@ def update_warning(n):
 )
 def update_slider(n):
 
-    if not os.path.exists(MEASUREMENT_FILE_NAME) or not os.path.getsize(MEASUREMENT_FILE_NAME):
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        df = pd.read_csv('rainfall.csv')
         day_count = df['day'].nunique()
         return day_count, generate_slider_marks(day_count), {'display': 'block'}
 
