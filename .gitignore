@@ -1,6 +1,6 @@
 *.pyc
 __pycache__/
 
-venv/
+rainly_venv/
 
 .idea/
