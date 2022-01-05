@@ -2,8 +2,8 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-from app import app, server
-from apps import hourly, monthly, home, daily
+from app import app
+from apps import daily, yearly, home, monthly
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -16,12 +16,12 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/':
         return home.layout
-    elif pathname == '/apps/hourly':
-        return hourly.layout
     elif pathname == '/apps/daily':
         return daily.layout
     elif pathname == '/apps/monthly':
         return monthly.layout
+    elif pathname == '/apps/yearly':
+        return yearly.layout
     else:
         return '404'
 

@@ -17,9 +17,9 @@ layout = html.Div(
             id="div-navigation",
             children=[
                 dcc.Link(id='home', className="active", children='Start', href='/'),
-                dcc.Link(id='home', children='Godzinowa analiza', href='/apps/hourly'),
                 dcc.Link(id='home', children='Dzienna analiza', href='/apps/daily'),
-                dcc.Link(id='home', children='Miesięczna analiza', href='/apps/monthly')
+                dcc.Link(id='home', children='Miesięczna analiza', href='/apps/monthly'),
+                dcc.Link(id='home', children='Roczna analiza', href='/apps/yearly')
             ]
         ),
         html.Div(

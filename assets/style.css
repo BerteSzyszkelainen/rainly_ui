@@ -9,7 +9,7 @@ body {
     text-align: center;
 }
 
-#label-timer-hourly-page, #label-timer-home-page, #label-timer-daily-page, #label-timer-monthly-page {
+#label-timer-daily-page, #label-timer-home-page, #label-timer-monthly-page, #label-timer-yearly-page {
     text-align: right;
     font-size: 15px;
     margin-bottom: 5px;
@@ -17,11 +17,6 @@ body {
 }
 
 #bar-chart {
-    margin-bottom: 30px;
-    margin-top: 30px;
-}
-
-#heatmap-chart {
     margin-bottom: 30px;
     margin-top: 30px;
 }
