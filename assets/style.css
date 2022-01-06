@@ -16,27 +16,28 @@ body {
     display: block;
 }
 
-#bar-chart {
-    margin-bottom: 30px;
-    margin-top: 30px;
-}
-
 #div-warning {
     font-size: 40px;
     margin-top: 60px;
     display: block;
 }
 
+#div-text {
+    text-align: left;
+    margin-left: 45px;
+}
+
 #label-rainfall-sum-result {
-    font-size: 30px;
-    margin-bottom: 40px;
+    font-size: 20px;
+    margin-bottom: 5px;
     display: block;
 }
 
 #label-select-range-title {
     display: block;
+    margin-top: 80px;
     margin-bottom: 20px;
-    font-size: 25px;
+    font-size: 20px;
 }
 
 #div-slider {
@@ -45,6 +46,7 @@ body {
     margin: 0 auto;
     width: 50%;
     font-size: 30px;
+    margin-bottom: 40px;
 }
 
 #div-navigation {

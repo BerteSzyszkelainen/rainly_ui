@@ -1,5 +1,6 @@
 import random
 
+import pytz
 from babel.dates import format_datetime
 from dash import dcc
 from dash import html
@@ -126,4 +127,4 @@ def update_heatmap_chart(n):
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(), format="EEEE, dd MMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')

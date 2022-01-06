@@ -1,15 +1,20 @@
 import random
-
+from datetime import datetime
+import pandas as pd
+import plotly.express as px
+import pytz
 from babel.dates import format_datetime
 from dash import dcc
 from dash import html
-from datetime import datetime
 from dash.dependencies import Input, Output
-import plotly.express as px
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, \
+    get_rainfall_sum_for_day_for_current_month
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
+
 
 layout = html.Div(
     id="root-div",
@@ -28,12 +33,27 @@ layout = html.Div(
             ]
         ),
         html.Div(
-            id="div-heatmap-chart",
-            children=dcc.Graph(id="heatmap-chart")
+            id="div-slider-month",
+            children=[
+                html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
+                dcc.Slider(
+                    id="slider-month",
+                    min=0,
+                    value=1,
+                )
+            ]
         ),
         html.Div(
-            id="div-heatmap-chart-2",
-            children=dcc.Graph(id="heatmap-chart-2")
+            id="div-bar-chart-month",
+            children=dcc.Graph(id="bar-chart-month")
+        ),
+        html.Div(
+            id="div-warning-month",
+            children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
+        ),
+        html.Div(
+            id="div-heatmap-chart-year",
+            children=dcc.Graph(id="heatmap-chart-year")
         ),
         dcc.Interval(
             id='interval-timer',
@@ -47,84 +67,127 @@ layout = html.Div(
         )
 ])
 
-@app.callback(
-    Output(component_id='heatmap-chart', component_property='figure'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_heatmap_chart(n):
-
-    rainfall_per_month_per_day = [[round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(31)]]
-
-    fig = px.imshow(rainfall_per_month_per_day,
-                    labels=dict(x="Numer dnia", y="Miesiąc", color="Suma opadów"),
-                    x=['01', '02', '03', '04', '05', '06', '07',
-                       '08', '09', '10', '11', '12', '13', '14',
-                       '15', '16', '17', '18', '19', '20', '21',
-                       '22', '23', '24', '25', '26', '27', '28',
-                       '29', '30', '31'],
-                    y=['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
-                    color_continuous_scale='blues',
-                    title="Suma opadów każdego dnia każdego miesiąca"
-                    )
-
-    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 10})
-    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
-    fig.update_layout(
-        hoverlabel=dict(
-            font_size=32,
-            font_family="Lucida Console"
-        )
-    )
-    fig.update_layout(margin=dict(l=20, r=20, t=80, b=20))
-
-    return fig
 
 @app.callback(
-    Output(component_id='heatmap-chart-2', component_property='figure'),
+    Output(component_id='bar-chart-month', component_property='figure'),
+    Output(component_id='bar-chart-month', component_property='style'),
+    Input(component_id='slider-month', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
-def update_heatmap_chart_2(n):
+def update_bar_chart(day_count, n):
 
-    rainfall_sum_per_month = [[round(random.uniform(0, 100), 1) for _ in range(12)]]
+    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE,
+                                  day_count=day_count)
 
-    fig = px.imshow(rainfall_sum_per_month,
-                    labels=dict(x="Miesiąc", y="Rok", color="Suma opadów"),
-                    x=['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
-                    y=['2022'],
-                    color_continuous_scale='blues',
-                    title="Suma opadów każdego miesiąca"
-                    )
-
-    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 10})
-    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
-    fig.update_layout(
-        hoverlabel=dict(
-            font_size=32,
-            font_family="Lucida Console"
+    if df.empty:
+        return {}, {'display': 'none'}
+    else:
+        fig = px.bar(df,
+                     x=df["day"].apply(str) + " " + df["month"].apply(lambda row: row[:3]),
+                     y="rainfall",
+                     title=f"Miesiące z wybranego okresu, suma: {round(df['rainfall'].sum(), 2)} mm")
+        fig.update_layout(yaxis_autorange=True)
+        fig.update_layout(xaxis_title="Dzień")
+        fig.update_layout(xaxis_dtick="n")
+        fig.update_layout(yaxis_title="mm")
+        fig.update_layout(showlegend=False)
+        fig.update_layout(transition_duration=500)
+        fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
+        fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
+        fig.update_traces(hovertemplate='Data: %{x} <br>Suma opadów: %{y} mm')
+        fig.update_traces(marker_color='#557A95')
+        fig.update_layout(font={"color": "white", "size": 18})
+        fig.update_layout(
+            hoverlabel=dict(
+                bgcolor='darkseagreen',
+                font_size=32,
+                font_family="Lucida Console"
+            )
         )
-    )
-    fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+        fig.update_layout(
+            title={
+                'y': 1.0,
+                'x': 0.0,
+                'xanchor': 'left',
+                'yanchor': 'auto'})
+        fig.update_layout(height=400)
+        fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
 
-    return fig
+        return fig, {'display': 'block'}
+
+
+@app.callback(
+    Output(component_id='div-warning-month', component_property='style'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_warning(n):
+
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
+    Output(component_id='slider-month', component_property='max'),
+    Output(component_id='slider-month', component_property='marks'),
+    Output(component_id='div-slider-month', component_property='style'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_slider(n):
+
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
+        return None, {}, {'display': 'none'}
+    else:
+        day_count = df['day'].nunique()
+        return day_count, generate_slider_marks(day_count), {'display': 'block'}
+
 
 @app.callback(
     Output('label-timer-monthly-page', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(), format="EEEE, dd MMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
+
+@app.callback(
+    Output(component_id='heatmap-chart-year', component_property='figure'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_heatmap_chart(n):
+
+    df = get_rainfall_sum_for_day_for_current_month(data_source=DATA_SOURCE)
+
+    fig = px.imshow([df["rainfall"]],
+                    labels=dict(x="Dzień", y="Miesiąc", color="mm"),
+                    x=df["day"].values.tolist(),
+                    y=[df["month"].values.tolist()[0]],
+                    color_continuous_scale='blues',
+                    title=f"Miesiące w tym roku, suma: {round(df['rainfall'].sum(), 2)} mm"
+                    )
+
+    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
+    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
+    fig.update_layout(font={"color": "white", "size": 18})
+    fig.update_layout(xaxis_dtick="n")
+    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor='darkseagreen',
+            font_size=32,
+            font_family="Lucida Console"
+        )
+    ),
+    fig.update_layout(
+        title={
+            'y': 1.0,
+            'x': 0.0,
+            'xanchor': 'left',
+            'yanchor': 'auto'})
+    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
+
+    return fig

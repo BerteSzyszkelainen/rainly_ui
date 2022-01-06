@@ -1,3 +1,4 @@
+import pytz
 from dash import dcc
 from dash import html
 from datetime import datetime
@@ -39,4 +40,4 @@ layout = html.Div(
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(), format="EEEE, dd MMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')

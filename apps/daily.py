@@ -2,16 +2,18 @@ import random
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
+import pytz
 from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, \
+    get_rainfall_sum_for_day_for_current_month
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -31,21 +33,9 @@ layout = html.Div(
             ]
         ),
         html.Div(
-            id="div-bar-chart",
-            children=dcc.Graph(id="bar-chart")
-        ),
-        html.Div(
-            id="div-warning",
-            children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
-        ),
-        html.Div(
-            id="div-text",
-            children=html.Label(id="label-rainfall-sum-result")
-        ),
-        html.Div(
             id="div-slider",
             children=[
-                html.Label(id="label-select-range-title", children='Wybierz zakres dni'),
+                html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
                 dcc.Slider(
                     id="slider",
                     min=0,
@@ -54,12 +44,16 @@ layout = html.Div(
             ]
         ),
         html.Div(
-            id="div-heatmap-daily-chart",
-            children=dcc.Graph(id="heatmap-chart-daily")
+            id="div-bar-chart",
+            children=dcc.Graph(id="bar-chart")
         ),
         html.Div(
-            id="div-heatmap-daily-chart-2",
-            children=dcc.Graph(id="heatmap-chart-daily-2")
+            id="div-warning",
+            children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
+        ),
+        html.Div(
+            id="div-heatmap-chart-month",
+            children=dcc.Graph(id="heatmap-chart-month")
         ),
         dcc.Interval(
             id='interval-timer',
@@ -91,7 +85,7 @@ def update_bar_chart(day_count, n):
         fig = px.bar(df,
                      x=df["day"].apply(str) + " " + df["month"].apply(lambda row: row[:3]),
                      y="rainfall",
-                     title="Suma opadów / dzień")
+                     title=f"Dni z wybranego okresu, suma: {round(df['rainfall'].sum(), 2)} mm")
         fig.update_layout(yaxis_autorange=True)
         fig.update_layout(xaxis_title="Dzień")
         fig.update_layout(xaxis_dtick="n")
@@ -102,39 +96,24 @@ def update_bar_chart(day_count, n):
         fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
         fig.update_traces(hovertemplate='Data: %{x} <br>Suma opadów: %{y} mm')
         fig.update_traces(marker_color='#557A95')
-        fig.update_layout(font={"color": "white", "size": 20})
+        fig.update_layout(font={"color": "white", "size": 18})
         fig.update_layout(
             hoverlabel=dict(
+                bgcolor='darkseagreen',
                 font_size=32,
                 font_family="Lucida Console"
             )
         )
         fig.update_layout(
             title={
-                'y': 0.9,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'top'})
+                'y': 1.0,
+                'x': 0.0,
+                'xanchor': 'left',
+                'yanchor': 'auto'})
         fig.update_layout(height=400)
+        fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
 
         return fig, {'display': 'block'}
-
-
-@app.callback(
-    Output(component_id='label-rainfall-sum-result', component_property='children'),
-    Output(component_id='label-rainfall-sum-result', component_property='style'),
-    Input(component_id='slider', component_property='value'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_rainfall_sum(day_count, n):
-
-    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE,
-                                  day_count=day_count)
-
-    if df.empty:
-        return None, {'display': 'none'}
-    else:
-        return 'Suma: {} mm'.format(round(df['rainfall'].sum(), 2)), {'display': 'block'}
 
 
 @app.callback(
@@ -173,104 +152,42 @@ def update_slider(n):
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(), format="EEEE, dd MMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
 
 @app.callback(
-    Output(component_id='heatmap-chart-daily', component_property='figure'),
+    Output(component_id='heatmap-chart-month', component_property='figure'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_heatmap_chart(n):
 
-    rainfall_per_hour_per_day = [[round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                  [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 30), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)],
-                                 [round(random.uniform(0, 20), 1) for _ in range(24)]]
+    df = get_rainfall_sum_for_day_for_current_month(data_source=DATA_SOURCE)
 
-    fig = px.imshow(rainfall_per_hour_per_day,
-                    labels=dict(x="Godzina", y="Dzień", color="Suma opadów"),
-                    y=['01', '02', '03', '04', '05', '06', '07',
-                       '08', '09', '10', '11', '12', '13', '14',
-                       '15', '16', '17', '18', '19', '20', '21',
-                       '22', '23', '24', '25', '26', '27', '28',
-                       '29', '30', '31'],
-                    x=['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00',
-                       '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
-                       '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'],
+    fig = px.imshow([df["rainfall"]],
+                    labels=dict(x="Dzień", y="Miesiąc", color="mm"),
+                    x=df["day"].values.tolist(),
+                    y=[df["month"].values.tolist()[0]],
                     color_continuous_scale='blues',
-                    title="Suma opadów każda godzina każdego dnia"
+                    title=f"Dni w tym miesiącu, suma: {round(df['rainfall'].sum(), 2)} mm"
                     )
 
     fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
     fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 10})
-    fig.update_traces(hovertemplate='Data: %{x} %{y} Styczeń <br>Suma opadów: %{z} mm')
+    fig.update_layout(font={"color": "white", "size": 18})
+    fig.update_layout(xaxis_dtick="n")
+    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
     fig.update_layout(
         hoverlabel=dict(
+            bgcolor='darkseagreen',
             font_size=32,
             font_family="Lucida Console"
         )
-    )
-    fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
-
-    return fig
-
-@app.callback(
-    Output(component_id='heatmap-chart-daily-2', component_property='figure'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_heatmap_chart(n):
-
-    rainfall_sum_per_day = [[round(random.uniform(0, 50), 1) for _ in range(31)]]
-
-    fig = px.imshow(rainfall_sum_per_day,
-                    labels=dict(x="Dzień", y="Miesiąc", color="Suma opadów"),
-                    x=['01', '02', '03', '04', '05', '06', '07',
-                       '08', '09', '10', '11', '12', '13', '14',
-                       '15', '16', '17', '18', '19', '20', '21',
-                       '22', '23', '24', '25', '26', '27', '28',
-                       '29', '30', '31'],
-                    y=["Styczeń"],
-                    color_continuous_scale='blues',
-                    title="Suma opadów każdego dnia"
-                    )
-
-    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 10})
-    fig.update_traces(hovertemplate='Dzień: %{x} %{y} <br>Suma opadów: %{z} mm')
+    ),
     fig.update_layout(
-        hoverlabel=dict(
-            font_size=32,
-            font_family="Lucida Console"
-        )
-    )
-    fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+        title={
+            'y': 1.0,
+            'x': 0.0,
+            'xanchor': 'left',
+            'yanchor': 'auto'})
+    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
 
     return fig
