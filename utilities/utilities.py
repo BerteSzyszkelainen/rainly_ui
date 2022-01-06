@@ -30,6 +30,13 @@ def get_rainfall_sum_per_day(data_source, day_count):
         .sort_values(by=['year', 'month', 'day'])
     return df_sum_per_day.iloc[-day_count:]
 
+def get_rainfall_sum_per_month(data_source, month_count):
+    df = pd.read_json(data_source)
+    df_sum_per_day = df.groupby(["month", "year"], as_index=False) \
+        .sum() \
+        .sort_values(by=['year', 'month'])
+    return df_sum_per_day.iloc[-month_count:]
+
 def get_rainfall_sum_for_day_for_current_month(data_source):
     df = pd.read_json(data_source)
     df = df.loc[(df['month'] == "Styczeń") & (df['year'] == 2022)]

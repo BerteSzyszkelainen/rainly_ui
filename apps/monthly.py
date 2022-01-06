@@ -8,12 +8,12 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, \
-    get_rainfall_sum_for_day_for_current_month
+    get_rainfall_sum_for_day_for_current_month, get_rainfall_sum_per_month
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
+DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
 
 
 layout = html.Div(
@@ -74,16 +74,16 @@ layout = html.Div(
     Input(component_id='slider-month', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
-def update_bar_chart(day_count, n):
+def update_bar_chart(month_count, n):
 
-    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE,
-                                  day_count=day_count)
+    df = get_rainfall_sum_per_month(data_source=DATA_SOURCE,
+                                  month_count=month_count)
 
     if df.empty:
         return {}, {'display': 'none'}
     else:
         fig = px.bar(df,
-                     x=df["day"].apply(str) + " " + df["month"].apply(lambda row: row[:3]),
+                     x=df["month"] + " '" + df["year"].apply(lambda row: str(row)[2:]),
                      y="rainfall",
                      title=f"Miesiące z wybranego okresu, suma: {round(df['rainfall'].sum(), 2)} mm")
         fig.update_layout(yaxis_autorange=True)
@@ -143,8 +143,8 @@ def update_slider(n):
     if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        day_count = df['day'].nunique()
-        return day_count, generate_slider_marks(day_count), {'display': 'block'}
+        month_count = df['month'].nunique()
+        return month_count, generate_slider_marks(month_count), {'display': 'block'}
 
 
 @app.callback(
