@@ -12,7 +12,7 @@ from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_mont
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
+DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
 
 
 layout = html.Div(
