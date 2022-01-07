@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
@@ -7,8 +6,7 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_month, \
-    get_rainfall_sum_for_month_for_current_year, get_rainfall_sum_per_year, get_rainfall_sum_for_each_year
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_year, get_rainfall_sum_for_each_year
 
 from app import app
 
@@ -45,7 +43,7 @@ layout = html.Div(
         ),
         html.Div(
             id="div-bar-chart-year",
-            children=dcc.Graph(id="bar-chart-year")
+            children=dcc.Loading(children=dcc.Graph(id="bar-chart-year"))
         ),
         html.Div(
             id="div-warning-year",
@@ -53,7 +51,7 @@ layout = html.Div(
         ),
         html.Div(
             id="div-heatmap-chart-so-far",
-            children=dcc.Graph(id="heatmap-chart-so-far")
+            children=dcc.Loading(children=dcc.Graph(id="heatmap-chart-so-far"))
         ),
         dcc.Interval(
             id='interval-timer',
@@ -126,8 +124,6 @@ def update_warning(n):
 
     if df.empty:
         return {'display': 'block'}
-    else:
-        return {'display': 'none'}
 
 
 @app.callback(

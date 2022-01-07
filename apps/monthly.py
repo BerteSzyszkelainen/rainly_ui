@@ -44,7 +44,7 @@ layout = html.Div(
         ),
         html.Div(
             id="div-bar-chart-month",
-            children=dcc.Graph(id="bar-chart-month")
+            children=dcc.Loading(children=dcc.Graph(id="bar-chart-month"))
         ),
         html.Div(
             id="div-warning-month",
@@ -52,7 +52,7 @@ layout = html.Div(
         ),
         html.Div(
             id="div-heatmap-chart-year",
-            children=dcc.Graph(id="heatmap-chart-year")
+            children=dcc.Loading(children=dcc.Graph(id="heatmap-chart-year"))
         ),
         dcc.Interval(
             id='interval-timer',
@@ -125,8 +125,6 @@ def update_warning(n):
 
     if df.empty:
         return {'display': 'block'}
-    else:
-        return {'display': 'none'}
 
 
 @app.callback(

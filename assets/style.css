@@ -36,7 +36,7 @@ body {
 #div-warning-daily, #div-warning-month, #div-warning-year  {
     font-size: 40px;
     margin-top: 75px;
-    display: block;
+    display: none;
 }
 
 #label-select-range-title {
