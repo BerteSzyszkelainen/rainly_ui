@@ -10,7 +10,7 @@ body {
 }
 
 #root-div-welcome {
-    opacity:0.8;
+    opacity:1.0;
     position:fixed;
     width:100%;
     height:100%;
@@ -23,9 +23,10 @@ body {
 
 #label-timer-daily-page, #label-timer-home-page, #label-timer-monthly-page, #label-timer-yearly-page {
     text-align: right;
-    font-size: 15px;
+    font-size: 20px;
     margin-bottom: 5px;
     display: block;
+    margin: 3%;
 }
 #label-timer-home-page {
     color: black;
