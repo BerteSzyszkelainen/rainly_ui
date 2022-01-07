@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
@@ -7,12 +6,13 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_month, get_rainfall_sum_for_month_for_current_year
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_month, \
+    get_rainfall_sum_for_month_for_current_year, month_number_to_name_pl
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -82,7 +82,7 @@ def update_bar_chart(month_count, n):
         return {}, {'display': 'none'}
     else:
         fig = px.bar(df,
-                     x=df["month"] + " " + df["year"].apply(str),
+                     x=df["month"].apply(lambda x: month_number_to_name_pl(x)) + " " + df["year"].apply(str),
                      y="rainfall",
                      title=f"Miesiące z wybranego okresu")
         fig.update_layout(yaxis_autorange=True)
@@ -140,7 +140,7 @@ def update_slider(n):
     if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        month_count = df['month'].nunique()
+        month_count = df.groupby(["year", "month"], as_index=False).ngroups
         return month_count, generate_slider_marks(month_count, tick_postfix='m'), {'display': 'block'}
 
 
@@ -161,7 +161,7 @@ def update_heatmap_chart(n):
 
     fig = px.imshow([df["rainfall"]],
                     labels=dict(x="Miesiąc", y="Rok", color="Opady [mm]"),
-                    x=df["month"].values.tolist(),
+                    x=[month_number_to_name_pl(month) for month in df["month"].values.tolist()],
                     y=[df["year"].values.tolist()[0]],
                     color_continuous_scale='blues',
                     title=f"Miesiące w tym roku"

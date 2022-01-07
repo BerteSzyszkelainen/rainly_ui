@@ -1,4 +1,8 @@
+from datetime import datetime
+
 import pandas as pd
+from babel.dates import format_datetime
+
 
 def generate_slider_marks(days_count, tick_postfix):
     if days_count < 3:
@@ -46,7 +50,7 @@ def get_rainfall_sum_per_year(data_source, year_count):
 
 def get_rainfall_sum_for_day_for_current_month(data_source):
     df = pd.read_json(data_source)
-    df = df.loc[(df['month'] == "Styczeń") & (df['year'] == 2022)]
+    df = df.loc[(df['month'] == 1) & (df['year'] == 2022)]
     df_sum_per_day = df.groupby(["day", "month", "year"], as_index=False) \
         .sum() \
         .sort_values(by=['day'])
@@ -66,3 +70,6 @@ def get_rainfall_sum_for_each_year(data_source):
         .sum() \
         .sort_values(by=['year'])
     return df_sum_per_year
+
+def month_number_to_name_pl(number):
+    return format_datetime(datetime.strptime(str(number), "%m"), format="MMM", locale='pl')

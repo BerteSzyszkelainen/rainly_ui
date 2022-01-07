@@ -7,12 +7,12 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, \
-    get_rainfall_sum_for_day_for_current_month
+    get_rainfall_sum_for_day_for_current_month, month_number_to_name_pl
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -82,7 +82,9 @@ def update_bar_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = px.bar(df,
-                     x=df["day"].apply(str) + " " + df["month"],
+                     x=df["day"].apply(str) + " " +
+                       df["month"].apply(lambda x: month_number_to_name_pl(x)) + " " +
+                       df["year"].apply(str),
                      y=df["rainfall"],
                      title=f"Dni z wybranego okresu")
         fig.update_layout(yaxis_autorange=True)
@@ -93,9 +95,9 @@ def update_bar_chart(day_count, n):
         fig.update_layout(transition_duration=500)
         fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
         fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-        fig.update_traces(hovertemplate='Data: %{x} <br>Suma opadów: %{y} mm')
         fig.update_traces(marker_color='#557A95')
         fig.update_layout(font={"color": "white", "size": 18})
+        fig.update_traces(hovertemplate="Data: %{x}<br>Suma opadów: %{y} mm")
         fig.update_layout(
             hoverlabel=dict(
                 bgcolor='darkseagreen',
@@ -140,7 +142,7 @@ def update_slider(n):
     if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        day_count = df['day'].nunique()
+        day_count = df.groupby(["day", "month"], as_index=False).ngroups
         return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
 
 
@@ -162,7 +164,7 @@ def update_heatmap_chart(n):
     fig = px.imshow([df["rainfall"].values.tolist()],
                     labels=dict(x="Dzień", y="Miesiąc", color="Opady [mm]"),
                     x=df["day"].values.tolist(),
-                    y=[df["month"].values.tolist()[0]],
+                    y=[month_number_to_name_pl(df["month"].values.tolist()[0])],
                     color_continuous_scale='blues',
                     title=f"Dni w tym miesiącu",
                     aspect="auto"
