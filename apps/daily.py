@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
@@ -33,7 +32,7 @@ layout = html.Div(
             ]
         ),
         html.Div(
-            id="div-slider",
+            id="div-slider-daily",
             children=[
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
                 dcc.Slider(
@@ -44,12 +43,12 @@ layout = html.Div(
             ]
         ),
         html.Div(
-            id="div-bar-chart",
-            children=dcc.Graph(id="bar-chart")
+            id="div-bar-chart-daily",
+            children=dcc.Graph(id="bar-chart-daily")
         ),
         html.Div(
-            id="div-warning",
-            children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
+            id="div-warning-daily",
+            children=html.Label(id="label-warning-daily", children="Oczekiwanie na pierwszy pomiar...")
         ),
         html.Div(
             id="div-heatmap-chart-month",
@@ -69,8 +68,8 @@ layout = html.Div(
 
 
 @app.callback(
-    Output(component_id='bar-chart', component_property='figure'),
-    Output(component_id='bar-chart', component_property='style'),
+    Output(component_id='bar-chart-daily', component_property='figure'),
+    Output(component_id='bar-chart-daily', component_property='style'),
     Input(component_id='slider', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
@@ -83,9 +82,9 @@ def update_bar_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = px.bar(df,
-                     x=df["day"].apply(str) + " " + df["month"].apply(lambda row: row[:3]),
-                     y="rainfall",
-                     title=f"Dni z wybranego okresu, suma: {round(df['rainfall'].sum(), 2)} mm")
+                     x=df["day"].apply(str) + " " + df["month"],
+                     y=df["rainfall"],
+                     title=f"Dni z wybranego okresu")
         fig.update_layout(yaxis_autorange=True)
         fig.update_layout(xaxis_title="Dzień")
         fig.update_layout(xaxis_dtick="n")
@@ -100,7 +99,7 @@ def update_bar_chart(day_count, n):
         fig.update_layout(
             hoverlabel=dict(
                 bgcolor='darkseagreen',
-                font_size=32,
+                font_size=20,
                 font_family="Lucida Console"
             )
         )
@@ -117,7 +116,7 @@ def update_bar_chart(day_count, n):
 
 
 @app.callback(
-    Output(component_id='div-warning', component_property='style'),
+    Output(component_id='div-warning-daily', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
@@ -133,7 +132,7 @@ def update_warning(n):
 @app.callback(
     Output(component_id='slider', component_property='max'),
     Output(component_id='slider', component_property='marks'),
-    Output(component_id='div-slider', component_property='style'),
+    Output(component_id='div-slider-daily', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_slider(n):
@@ -144,7 +143,7 @@ def update_slider(n):
         return None, {}, {'display': 'none'}
     else:
         day_count = df['day'].nunique()
-        return day_count, generate_slider_marks(day_count), {'display': 'block'}
+        return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
 
 
 @app.callback(
@@ -162,23 +161,23 @@ def update_heatmap_chart(n):
 
     df = get_rainfall_sum_for_day_for_current_month(data_source=DATA_SOURCE)
 
-    fig = px.imshow([df["rainfall"]],
-                    labels=dict(x="Dzień", y="Miesiąc", color="mm"),
+    fig = px.imshow([df["rainfall"].values.tolist()],
+                    labels=dict(x="Dzień", y="Miesiąc", color="Opady [mm]"),
                     x=df["day"].values.tolist(),
                     y=[df["month"].values.tolist()[0]],
                     color_continuous_scale='blues',
-                    title=f"Dni w tym miesiącu, suma: {round(df['rainfall'].sum(), 2)} mm"
+                    title=f"Dni w tym miesiącu",
+                    aspect="auto"
                     )
 
     fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
     fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
     fig.update_layout(font={"color": "white", "size": 18})
     fig.update_layout(xaxis_dtick="n")
-    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
     fig.update_layout(
         hoverlabel=dict(
             bgcolor='darkseagreen',
-            font_size=32,
+            font_size=20,
             font_family="Lucida Console"
         )
     ),

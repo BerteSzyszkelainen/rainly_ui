@@ -16,20 +16,9 @@ body {
     display: block;
 }
 
-#div-warning {
+#div-warning-daily, #div-warning-month, #div-warning-year  {
     font-size: 40px;
-    margin-top: 60px;
-    display: block;
-}
-
-#div-text {
-    text-align: left;
-    margin-left: 45px;
-}
-
-#label-rainfall-sum-result {
-    font-size: 20px;
-    margin-bottom: 5px;
+    margin-top: 75px;
     display: block;
 }
 
@@ -40,13 +29,13 @@ body {
     font-size: 20px;
 }
 
-#div-slider {
+#div-slider-daily, #div-slider-month, #div-slider-year  {
     text-align: left;
     position: center;
     margin: 0 auto;
     width: 50%;
     font-size: 30px;
-    margin-bottom: 40px;
+    margin-bottom: 75px;
 }
 
 #div-navigation {
@@ -79,4 +68,8 @@ body {
     left: 50%;
     transform: translate(-50%,-50%);
     font-size: 40px;
+}
+
+#div-bar-chart-daily, #div-bar-chart-month, #div-bar-chart-year {
+    margin-bottom: 60px;
 }

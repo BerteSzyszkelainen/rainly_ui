@@ -1,16 +1,20 @@
 import random
-
+from datetime import datetime
+import pandas as pd
+import plotly.express as px
 import pytz
 from babel.dates import format_datetime
 from dash import dcc
 from dash import html
-from datetime import datetime
 from dash.dependencies import Input, Output
-import plotly.express as px
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_month, \
+    get_rainfall_sum_for_month_for_current_year, get_rainfall_sum_per_year, get_rainfall_sum_for_each_year
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
+DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
+
 
 layout = html.Div(
     id="root-div",
@@ -23,18 +27,33 @@ layout = html.Div(
             id="div-navigation",
             children=[
                 dcc.Link(id='home', children='Start', href='/'),
-                dcc.Link(id='home', children='Godzinowa analiza', href='/apps/daily'),
-                dcc.Link(id='home', children='Dzienna analiza', href='/apps/monthly'),
+                dcc.Link(id='home', children='Dzienna analiza', href='/apps/daily'),
+                dcc.Link(id='home', children='Miesięczna analiza', href='/apps/monthly'),
                 dcc.Link(id='home', className="active", children='Roczna analiza', href='/apps/yearly')
             ]
         ),
         html.Div(
-            id="div-heatmap-chart",
-            children=dcc.Graph(id="heatmap-chart-yearly")
+            id="div-slider-year",
+            children=[
+                html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
+                dcc.Slider(
+                    id="slider-year",
+                    min=0,
+                    value=1,
+                )
+            ]
         ),
         html.Div(
-            id="div-heatmap-chart-2",
-            children=dcc.Graph(id="heatmap-chart-yearly-2")
+            id="div-bar-chart-year",
+            children=dcc.Graph(id="bar-chart-year")
+        ),
+        html.Div(
+            id="div-warning-year",
+            children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
+        ),
+        html.Div(
+            id="div-heatmap-chart-so-far",
+            children=dcc.Graph(id="heatmap-chart-so-far")
         ),
         dcc.Interval(
             id='interval-timer',
@@ -48,79 +67,85 @@ layout = html.Div(
         )
 ])
 
-@app.callback(
-    Output(component_id='heatmap-chart-yearly', component_property='figure'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_heatmap_chart(n):
-
-    rainfall_per_month_per_day = [[round(random.uniform(0, 90), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)],
-                                  [round(random.uniform(0, 30), 1) for _ in range(12)]]
-
-    fig = px.imshow(rainfall_per_month_per_day,
-                    labels=dict(x="Miesiąc", y="Rok", color="Suma opadów"),
-                    y=['2010', '2011', '2012', '2013', '2014', '2015', '2016',
-                       '2017', '2018', '2019', '2020', '2021', '2022'],
-                    x=['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
-                    color_continuous_scale='blues',
-                    title="Suma opadów każdego miesiąca każdego roku"
-                    )
-
-    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 10})
-    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
-    fig.update_layout(
-        hoverlabel=dict(
-            font_size=32,
-            font_family="Lucida Console"
-        )
-    )
-    fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
-
-    return fig
 
 @app.callback(
-    Output(component_id='heatmap-chart-yearly-2', component_property='figure'),
+    Output(component_id='bar-chart-year', component_property='figure'),
+    Output(component_id='bar-chart-year', component_property='style'),
+    Input(component_id='slider-year', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
-def update_heatmap_chart(n):
+def update_bar_chart(month_count, n):
 
-    rainfall_sum_per_year = [[round(random.uniform(0, 200), 1) for _ in range(13)]]
+    df = get_rainfall_sum_per_year(data_source=DATA_SOURCE,
+                                  year_count=month_count)
 
-    fig = px.imshow(rainfall_sum_per_year,
-                    labels=dict(x="Rok", y="", color="Suma opadów"),
-                    x=['2010', '2011', '2012', '2013', '2014', '2015', '2016',
-                       '2017', '2018', '2019', '2020', '2021', '2022'],
-                    y=[""],
-                    color_continuous_scale='blues',
-                    title="Suma opadów każdego roku"
-                    )
-
-    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 10})
-    fig.update_traces(hovertemplate='Rok: %{x} <br>Suma opadów: %{z} mm')
-    fig.update_layout(
-        hoverlabel=dict(
-            font_size=32,
-            font_family="Lucida Console"
+    if df.empty:
+        return {}, {'display': 'none'}
+    else:
+        fig = px.bar(df,
+                     x=df["year"],
+                     y="rainfall",
+                     title=f"Lata z wybranego okresu")
+        fig.update_layout(yaxis_autorange=True)
+        fig.update_layout(xaxis_title="Rok")
+        fig.update_layout(xaxis_dtick="n")
+        fig.update_layout(yaxis_title="mm")
+        fig.update_layout(showlegend=False)
+        fig.update_layout(transition_duration=500)
+        fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
+        fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
+        fig.update_traces(hovertemplate='Data: %{x} <br>Suma opadów: %{y} mm')
+        fig.update_traces(marker_color='#557A95')
+        fig.update_layout(font={"color": "white", "size": 18})
+        fig.update_layout(
+            hoverlabel=dict(
+                bgcolor='darkseagreen',
+                font_size=20,
+                font_family="Lucida Console"
+            )
         )
-    )
-    fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+        fig.update_layout(
+            title={
+                'y': 1.0,
+                'x': 0.0,
+                'xanchor': 'left',
+                'yanchor': 'auto'})
+        fig.update_layout(height=400)
+        fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
 
-    return fig
+        return fig, {'display': 'block'}
+
+
+@app.callback(
+    Output(component_id='div-warning-year', component_property='style'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_warning(n):
+
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(
+    Output(component_id='slider-year', component_property='max'),
+    Output(component_id='slider-year', component_property='marks'),
+    Output(component_id='div-slider-year', component_property='style'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_slider(n):
+
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
+        return None, {}, {'display': 'none'}
+    else:
+        year_count = df['year'].nunique()
+        return year_count, generate_slider_marks(year_count, tick_postfix='r'), {'display': 'block'}
+
 
 @app.callback(
     Output('label-timer-yearly-page', 'children'),
@@ -128,3 +153,41 @@ def update_heatmap_chart(n):
 )
 def update_timer(n):
     return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
+
+@app.callback(
+    Output(component_id='heatmap-chart-so-far', component_property='figure'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_heatmap_chart(n):
+
+    df = get_rainfall_sum_for_each_year(data_source=DATA_SOURCE)
+
+    fig = px.imshow([df["rainfall"]],
+                    labels=dict(x="Rok", y="Okres pomiarów", color="Opady [mm]"),
+                    x=df["year"].values.tolist(),
+                    y=[""],
+                    color_continuous_scale='blues',
+                    title=f"Lata w całym okresie pomiarów"
+                    )
+
+    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
+    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
+    fig.update_layout(font={"color": "white", "size": 18})
+    fig.update_layout(xaxis_dtick="n")
+    fig.update_layout(yaxis_dtick="n")
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor='darkseagreen',
+            font_size=20,
+            font_family="Lucida Console"
+        )
+    ),
+    fig.update_layout(
+        title={
+            'y': 1.0,
+            'x': 0.0,
+            'xanchor': 'left',
+            'yanchor': 'auto'})
+    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
+
+    return fig

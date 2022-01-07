@@ -7,8 +7,7 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, \
-    get_rainfall_sum_for_day_for_current_month, get_rainfall_sum_per_month
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_month, get_rainfall_sum_for_month_for_current_year
 
 from app import app
 
@@ -85,7 +84,7 @@ def update_bar_chart(month_count, n):
         fig = px.bar(df,
                      x=df["month"] + " '" + df["year"].apply(lambda row: str(row)[2:]),
                      y="rainfall",
-                     title=f"Miesiące z wybranego okresu, suma: {round(df['rainfall'].sum(), 2)} mm")
+                     title=f"Miesiące z wybranego okresu")
         fig.update_layout(yaxis_autorange=True)
         fig.update_layout(xaxis_title="Dzień")
         fig.update_layout(xaxis_dtick="n")
@@ -100,7 +99,7 @@ def update_bar_chart(month_count, n):
         fig.update_layout(
             hoverlabel=dict(
                 bgcolor='darkseagreen',
-                font_size=32,
+                font_size=20,
                 font_family="Lucida Console"
             )
         )
@@ -144,7 +143,7 @@ def update_slider(n):
         return None, {}, {'display': 'none'}
     else:
         month_count = df['month'].nunique()
-        return month_count, generate_slider_marks(month_count), {'display': 'block'}
+        return month_count, generate_slider_marks(month_count, tick_postfix='m'), {'display': 'block'}
 
 
 @app.callback(
@@ -160,25 +159,25 @@ def update_timer(n):
 )
 def update_heatmap_chart(n):
 
-    df = get_rainfall_sum_for_day_for_current_month(data_source=DATA_SOURCE)
+    df = get_rainfall_sum_for_month_for_current_year(data_source=DATA_SOURCE)
 
     fig = px.imshow([df["rainfall"]],
-                    labels=dict(x="Dzień", y="Miesiąc", color="mm"),
-                    x=df["day"].values.tolist(),
-                    y=[df["month"].values.tolist()[0]],
+                    labels=dict(x="Miesiąc", y="Rok", color="Opady [mm]"),
+                    x=df["month"].values.tolist(),
+                    y=[df["year"].values.tolist()[0]],
                     color_continuous_scale='blues',
-                    title=f"Miesiące w tym roku, suma: {round(df['rainfall'].sum(), 2)} mm"
+                    title=f"Miesiące w tym roku"
                     )
 
     fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
     fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
     fig.update_layout(font={"color": "white", "size": 18})
     fig.update_layout(xaxis_dtick="n")
-    fig.update_traces(hovertemplate='Data: %{x} %{y} <br>Suma opadów: %{z} mm')
+    fig.update_layout(yaxis_dtick="n")
     fig.update_layout(
         hoverlabel=dict(
             bgcolor='darkseagreen',
-            font_size=32,
+            font_size=20,
             font_family="Lucida Console"
         )
     ),
