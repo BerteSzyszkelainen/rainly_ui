@@ -8,7 +8,7 @@ from babel.dates import format_datetime
 from app import app
 
 layout = html.Div(
-    id="root-div",
+    id="root-div-welcome",
     children=[
         html.Div(
             id="div-timer",

@@ -9,12 +9,28 @@ body {
     text-align: center;
 }
 
+#root-div-welcome {
+    opacity:0.8;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0px;
+    left:0px;
+    z-index:1000;
+    background: url('DSC_4686.JPG');
+    background-size: cover;
+}
+
 #label-timer-daily-page, #label-timer-home-page, #label-timer-monthly-page, #label-timer-yearly-page {
     text-align: right;
     font-size: 15px;
     margin-bottom: 5px;
     display: block;
 }
+#label-timer-home-page {
+    color: black;
+}
+
 
 #div-warning-daily, #div-warning-month, #div-warning-year  {
     font-size: 40px;
@@ -41,6 +57,7 @@ body {
 #div-navigation {
   background-color: #333;
   overflow: hidden;
+  margin: 3%;
 }
 
 #div-navigation #home{
@@ -63,11 +80,11 @@ body {
 }
 
 #div-welcome {
-    position: absolute;
-    top:  50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
+    position: adjacent;
     font-size: 40px;
+    background-color: #333;
+    margin: 3%;
+    padding: 14px 16px;
 }
 
 #div-bar-chart-daily, #div-bar-chart-month, #div-bar-chart-year {
