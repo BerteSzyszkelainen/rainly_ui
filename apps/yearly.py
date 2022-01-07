@@ -165,7 +165,7 @@ def update_heatmap_chart(n):
     fig = px.imshow([df["rainfall"]],
                     labels=dict(x="Rok", y="Okres pomiarów", color="Opady [mm]"),
                     x=df["year"].values.tolist(),
-                    y=[""],
+                    y=["Lata {}-{}".format(df["year"].values.tolist()[0], df["year"].values.tolist()[-1])],
                     color_continuous_scale='blues',
                     title=f"Lata w całym okresie pomiarów"
                     )

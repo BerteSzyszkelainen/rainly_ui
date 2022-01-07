@@ -82,7 +82,7 @@ def update_bar_chart(month_count, n):
         return {}, {'display': 'none'}
     else:
         fig = px.bar(df,
-                     x=df["month"] + " '" + df["year"].apply(lambda row: str(row)[2:]),
+                     x=df["month"] + " " + df["year"].apply(str),
                      y="rainfall",
                      title=f"Miesiące z wybranego okresu")
         fig.update_layout(yaxis_autorange=True)
