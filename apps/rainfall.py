@@ -20,39 +20,38 @@ layout = html.Div(
     children=[
         html.Div(
             id="div-timer",
-            children=html.Label(id='label-timer-daily-page')
+            children=html.Label(id='label-timer-rainfall')
         ),
         html.Div(
             id="div-navigation",
             children=[
                 dcc.Link(id='home', children='Start', href='/'),
-                dcc.Link(id='home', className="active", children='Dzień', href='/apps/daily'),
-                dcc.Link(id='home', children='Miesiąc', href='/apps/monthly'),
-                dcc.Link(id='home', children='Rok', href='/apps/yearly')
+                dcc.Link(id='home', className="active", children='Opady', href='/apps/rainfall'),
+                dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
+                dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
+                dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
+                dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
+                dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
         html.Div(
-            id="div-slider-daily",
+            id="div-slider-rainfall",
             children=[
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
                 dcc.Slider(
-                    id="slider",
+                    id="slider-rainfall",
                     min=0,
-                    value=1,
+                    value=7,
                 )
             ]
         ),
         html.Div(
-            id="div-bar-chart-daily",
-            children=dcc.Loading(children=dcc.Graph(id="bar-chart-daily"))
+            id="div-bar-chart-rainfall",
+            children=dcc.Loading(children=dcc.Graph(id="bar-chart-rainfall"))
         ),
         html.Div(
-            id="div-warning-daily",
-            children=html.Label(id="label-warning-daily", children="Oczekiwanie na pierwszy pomiar...")
-        ),
-        html.Div(
-            id="div-heatmap-chart-month",
-            children=dcc.Loading(children=dcc.Graph(id="heatmap-chart-month"))
+            id="div-warning-rainfall",
+            children=html.Label(id="label-warning-rainfall", children="Oczekiwanie na pierwszy pomiar...")
         ),
         dcc.Interval(
             id='interval-timer',
@@ -68,9 +67,9 @@ layout = html.Div(
 
 
 @app.callback(
-    Output(component_id='bar-chart-daily', component_property='figure'),
-    Output(component_id='bar-chart-daily', component_property='style'),
-    Input(component_id='slider', component_property='value'),
+    Output(component_id='bar-chart-rainfall', component_property='figure'),
+    Output(component_id='bar-chart-rainfall', component_property='style'),
+    Input(component_id='slider-rainfall', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_bar_chart(day_count, n):
@@ -85,8 +84,7 @@ def update_bar_chart(day_count, n):
                      x=df["day"].apply(str) + " " +
                        df["month"].apply(lambda x: month_number_to_name_pl(x)) + " " +
                        df["year"].apply(str),
-                     y=df["rainfall"],
-                     title=f"Dni z wybranego okresu")
+                     y=df["rainfall"])
         fig.update_layout(yaxis_autorange=True)
         fig.update_layout(xaxis_title="Dzień")
         fig.update_layout(xaxis_dtick="n")
@@ -118,7 +116,7 @@ def update_bar_chart(day_count, n):
 
 
 @app.callback(
-    Output(component_id='div-warning-daily', component_property='style'),
+    Output(component_id='div-warning-rainfall', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
@@ -130,9 +128,9 @@ def update_warning(n):
 
 
 @app.callback(
-    Output(component_id='slider', component_property='max'),
-    Output(component_id='slider', component_property='marks'),
-    Output(component_id='div-slider-daily', component_property='style'),
+    Output(component_id='slider-rainfall', component_property='max'),
+    Output(component_id='slider-rainfall', component_property='marks'),
+    Output(component_id='div-slider-rainfall', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_slider(n):
@@ -143,50 +141,14 @@ def update_slider(n):
         return None, {}, {'display': 'none'}
     else:
         day_count = df.groupby(["day", "month"], as_index=False).ngroups
+        if day_count > 28:
+            day_count = 28
         return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
 
 
 @app.callback(
-    Output('label-timer-daily-page', 'children'),
+    Output('label-timer-rainfall', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
     return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
-
-@app.callback(
-    Output(component_id='heatmap-chart-month', component_property='figure'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_heatmap_chart(n):
-
-    df = get_rainfall_sum_for_day_for_current_month(data_source=DATA_SOURCE)
-
-    fig = px.imshow([df["rainfall"].values.tolist()],
-                    labels=dict(x="Dzień", y="Miesiąc", color="Opady [mm]"),
-                    x=df["day"].values.tolist(),
-                    y=[month_number_to_name_pl(df["month"].values.tolist()[0])],
-                    color_continuous_scale='blues',
-                    title=f"Dni w tym miesiącu",
-                    aspect="auto"
-                    )
-
-    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 18})
-    fig.update_layout(xaxis_dtick="n")
-    fig.update_layout(
-        hoverlabel=dict(
-            bgcolor='darkseagreen',
-            font_size=20,
-            font_family="Lucida Console"
-        )
-    ),
-    fig.update_layout(
-        title={
-            'y': 1.0,
-            'x': 0.0,
-            'xanchor': 'left',
-            'yanchor': 'auto'})
-    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
-
-    return fig

@@ -21,19 +21,19 @@ body {
     background-size: cover;
 }
 
-#label-timer-daily-page, #label-timer-home-page, #label-timer-monthly-page, #label-timer-yearly-page {
+[id^=label-timer] {
     text-align: right;
     font-size: 20px;
     margin-bottom: 5px;
     display: block;
     margin: 3%;
 }
-#label-timer-home-page {
+
+#label-timer-home {
     color: black;
 }
 
-
-#div-warning-daily, #div-warning-month, #div-warning-year  {
+[id^=div-warning] {
     font-size: 40px;
     margin-top: 75px;
     display: none;
@@ -46,11 +46,11 @@ body {
     font-size: 20px;
 }
 
-#div-slider-daily, #div-slider-month, #div-slider-year  {
+[id^=div-slider] {
     text-align: left;
     position: center;
     margin: 0 auto;
-    width: 50%;
+    width: 100%;
     font-size: 30px;
     margin-bottom: 75px;
 }
@@ -88,6 +88,10 @@ body {
     padding: 14px 16px;
 }
 
-#div-bar-chart-daily, #div-bar-chart-month, #div-bar-chart-year {
+[id^=div-bar-chart] {
     margin-bottom: 60px;
+}
+
+#div-info {
+    font-size: 40px;
 }

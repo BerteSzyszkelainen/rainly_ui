@@ -8,27 +8,27 @@ from babel.dates import format_datetime
 from app import app
 
 layout = html.Div(
-    id="root-div-welcome",
+    id="root-div",
     children=[
         html.Div(
             id="div-timer",
-            children=html.Label(id='label-timer-home')
+            children=html.Label(id='label-timer-analysis')
         ),
         html.Div(
             id="div-navigation",
             children=[
-                dcc.Link(id='home', className="active", children='Start', href='/'),
+                dcc.Link(id='home', children='Start', href='/'),
                 dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
                 dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
                 dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
                 dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
                 dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
-                dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
+                dcc.Link(id='home', className="active", children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
         html.Div(
-            id="div-welcome",
-            children=html.Label(id='label-welcome', children="Witaj w Rainly!")
+            id="div-info",
+            children=html.Label(id='label-info', children="W budowie:)")
         ),
         dcc.Interval(
             id='interval-timer',
@@ -39,7 +39,7 @@ layout = html.Div(
 
 
 @app.callback(
-    Output('label-timer-home', 'children'),
+    Output('label-timer-analysis', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
