@@ -74,7 +74,7 @@ layout = html.Div(
 )
 def update_line_chart(day_count, n):
 
-    df = pd.read_json(DATA_SOURCE).iloc[-day_count:]
+    df = pd.read_json(DATA_SOURCE).sort_values(by=['year', 'month', 'day']).iloc[-day_count:]
 
     if df.empty:
         return {}, {'display': 'none'}

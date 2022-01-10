@@ -82,8 +82,7 @@ def update_bar_chart(day_count, n):
     else:
         fig = px.bar(df,
                      x=df["day"].apply(str) + " " +
-                       df["month"].apply(lambda x: month_number_to_name_pl(x)) + " " +
-                       df["year"].apply(str),
+                       df["month"].apply(lambda x: month_number_to_name_pl(x)),
                      y=df["rainfall"])
         fig.update_layout(yaxis_autorange=True)
         fig.update_layout(xaxis_title="Dzień")

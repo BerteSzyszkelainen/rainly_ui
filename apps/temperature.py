@@ -74,15 +74,14 @@ layout = html.Div(
 )
 def update_line_chart(day_count, n):
 
-    df = pd.read_json(DATA_SOURCE).iloc[-day_count:]
+    df = pd.read_json(DATA_SOURCE).sort_values(by=['year', 'month', 'day']).iloc[-day_count:]
 
     if df.empty:
         return {}, {'display': 'none'}
     else:
         fig = px.line(df,
                      x=df["day"].apply(str) + " " +
-                       df["month"].apply(lambda x: month_number_to_name_pl(x)) + " " +
-                       df["year"].apply(str),
+                       df["month"].apply(lambda x: month_number_to_name_pl(x)),
                      y=df["temperature"])
         fig.update_layout(yaxis_range=[-40, 50])
         fig.update_layout(xaxis_title="Dzień")
@@ -141,7 +140,7 @@ def update_slider(n):
     if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        day_count = df.groupby(["day", "month"], as_index=False).ngroups
+        day_count = df.groupby(["year", "day", "month"], as_index=False).ngroups
         if day_count > 28:
             day_count = 28
         return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
