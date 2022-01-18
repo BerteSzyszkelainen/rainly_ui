@@ -1,7 +1,9 @@
+import configparser
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 def generate_slider_marks(days_count, tick_postfix):
     style = {'font-size': 20, 'color': 'white'}
@@ -31,8 +33,8 @@ def generate_slider_marks(days_count, tick_postfix):
     return marks
 
 
-def get_rainfall_sum_per_day(data_source, day_count):
-    df = pd.read_json(data_source)
+def get_rainfall_sum_per_day(day_count):
+    df = pd.read_json(DATA_SOURCE)
     start_date = (datetime.now() - relativedelta(days=day_count-1))\
         .replace(hour=0,
                  minute=0,
@@ -47,8 +49,8 @@ def get_rainfall_sum_per_day(data_source, day_count):
     return df_sum_per_day
 
 
-def get_rainfall_sum(data_source, day_count):
-    df = pd.read_json(data_source)
+def get_total_rainfall_sum(day_count):
+    df = pd.read_json(DATA_SOURCE)
     start_date = (datetime.now() - relativedelta(days=day_count-1))\
         .replace(hour=0,
                  minute=0,
@@ -65,9 +67,9 @@ def degrees_to_compass(degrees):
     return arr[(val % 16)]
 
 
-def get_measurements(data_source, days):
-    df = pd.read_json(data_source)
-    start_date = (datetime.now() - relativedelta(days=days-1))\
+def get_measurements(day_count):
+    df = pd.read_json(DATA_SOURCE)
+    start_date = (datetime.now() - relativedelta(days=day_count-1))\
         .replace(hour=0,
                  minute=0,
                  second=0,
@@ -116,3 +118,8 @@ def apply_common_line_chart_features(fig):
     fig.update_traces(mode='lines+markers')
 
     return fig
+
+def read_configuration():
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    return config

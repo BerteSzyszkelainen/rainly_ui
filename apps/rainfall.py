@@ -7,12 +7,12 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, apply_common_chart_features, \
-    get_rainfall_sum
-
+    get_total_rainfall_sum, read_configuration
 from app import app
 
+CONFIG = read_configuration()
+DATA_SOURCE = CONFIG['DATA']['source']
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -74,7 +74,7 @@ layout = html.Div(
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_bar_chart(day_count, n):
-    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE, day_count=day_count)
+    df = get_rainfall_sum_per_day(day_count=day_count)
 
     if df.empty:
         return {}, {'display': 'none'}
@@ -128,7 +128,7 @@ def update_timer(n):
     Output('slider-rainfall-output', 'children'),
     Input('slider-rainfall', 'value')
 )
-def update_output(day_count):
-    rainfall_sum = get_rainfall_sum(DATA_SOURCE, day_count)
+def update_total_rainfall_sum(day_count):
+    rainfall_sum = get_total_rainfall_sum(day_count)
     return "Suma całkowita: {} mm".format(rainfall_sum)
 

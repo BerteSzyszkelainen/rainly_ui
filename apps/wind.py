@@ -8,12 +8,12 @@ from dash import html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 from utilities.utilities import generate_slider_marks, degrees_to_compass, apply_common_line_chart_features, \
-    get_measurements, apply_common_chart_features
-
+    get_measurements, apply_common_chart_features, read_configuration
 from app import app
 
+CONFIG = read_configuration()
+DATA_SOURCE = CONFIG['DATA']['source']
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -149,7 +149,7 @@ def update_bar_polar_chart_wind_max(day_count, n):
 )
 def update_line_chart(day_count, n):
 
-    df = get_measurements(DATA_SOURCE, day_count)
+    df = get_measurements(day_count=day_count)
 
     if df.empty:
         return {}, {'display': 'none'}

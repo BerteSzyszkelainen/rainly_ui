@@ -7,12 +7,12 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features
-
+    apply_common_chart_features, read_configuration
 from app import app
 
+CONFIG = read_configuration()
+DATA_SOURCE = CONFIG['DATA']['source']
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -74,7 +74,7 @@ layout = html.Div(
 )
 def update_line_chart(day_count, n):
 
-    df = get_measurements(DATA_SOURCE, day_count)
+    df = get_measurements(day_count=day_count)
 
     if df.empty:
         return {}, {'display': 'none'}

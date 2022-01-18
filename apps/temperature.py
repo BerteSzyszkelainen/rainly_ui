@@ -7,12 +7,12 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, get_measurements, apply_common_line_chart_features, \
-    apply_common_chart_features
-
+    apply_common_chart_features, read_configuration
 from app import app
 
 
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
+CONFIG = read_configuration()
+DATA_SOURCE = CONFIG['DATA']['source']
 
 
 layout = html.Div(
@@ -73,7 +73,7 @@ layout = html.Div(
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_line_chart(day_count, n):
-    df = get_measurements(DATA_SOURCE, day_count)
+    df = get_measurements(day_count=day_count)
 
     if df.empty:
         return {}, {'display': 'none'}
