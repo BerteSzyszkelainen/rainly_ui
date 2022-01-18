@@ -6,13 +6,13 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, \
-    get_rainfall_sum_for_day_for_current_month, month_number_to_name_pl
+from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, apply_common_chart_features, \
+    get_rainfall_sum
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -40,9 +40,10 @@ layout = html.Div(
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
                 dcc.Slider(
                     id="slider-rainfall",
-                    min=0,
-                    value=7,
-                )
+                    min=1,
+                    value=7
+                ),
+                html.Div(id='slider-rainfall-output')
             ]
         ),
         html.Div(
@@ -73,44 +74,17 @@ layout = html.Div(
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_bar_chart(day_count, n):
-
-    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE,
-                                  day_count=day_count)
+    df = get_rainfall_sum_per_day(data_source=DATA_SOURCE, day_count=day_count)
 
     if df.empty:
         return {}, {'display': 'none'}
     else:
-        fig = px.bar(df,
-                     x=df["day"].apply(str) + " " +
-                       df["month"].apply(lambda x: month_number_to_name_pl(x)),
-                     y=df["rainfall"])
+        fig = px.bar(df, x=df["day"] + '.' + df["month"], y=df["rainfall"])
+        fig = apply_common_chart_features(fig)
         fig.update_layout(yaxis_autorange=True)
-        fig.update_layout(xaxis_title="Dzień")
-        fig.update_layout(xaxis_dtick="n")
         fig.update_layout(yaxis_title="mm")
-        fig.update_layout(showlegend=False)
-        fig.update_layout(transition_duration=500)
-        fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-        fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
         fig.update_traces(marker_color='#557A95')
-        fig.update_layout(font={"color": "white", "size": 18})
         fig.update_traces(hovertemplate="Data: %{x}<br>Suma opadów: %{y} mm")
-        fig.update_layout(
-            hoverlabel=dict(
-                bgcolor='darkseagreen',
-                font_size=20,
-                font_family="Lucida Console"
-            )
-        )
-        fig.update_layout(
-            title={
-                'y': 1.0,
-                'x': 0.0,
-                'xanchor': 'left',
-                'yanchor': 'auto'})
-        fig.update_layout(height=400)
-        fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
-
         return fig, {'display': 'block'}
 
 
@@ -119,7 +93,6 @@ def update_bar_chart(day_count, n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
-
     df = pd.read_json(DATA_SOURCE)
 
     if df.empty:
@@ -133,13 +106,12 @@ def update_warning(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_slider(n):
-
     df = pd.read_json(DATA_SOURCE)
 
     if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        day_count = df.groupby(["day", "month"], as_index=False).ngroups
+        day_count = df.groupby([df["date"].dt.year, df["date"].dt.month, df["date"].dt.day], as_index=False).ngroups
         if day_count > 28:
             day_count = 28
         return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
@@ -151,3 +123,12 @@ def update_slider(n):
 )
 def update_timer(n):
     return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
+
+@app.callback(
+    Output('slider-rainfall-output', 'children'),
+    Input('slider-rainfall', 'value')
+)
+def update_output(day_count):
+    rainfall_sum = get_rainfall_sum(DATA_SOURCE, day_count)
+    return "Suma całkowita: {} mm".format(rainfall_sum)
+

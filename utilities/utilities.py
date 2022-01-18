@@ -1,27 +1,27 @@
 from datetime import datetime
-
+from dateutil.relativedelta import relativedelta
 import pandas as pd
-from babel.dates import format_datetime
 
 
 def generate_slider_marks(days_count, tick_postfix):
+    style = {'font-size': 20, 'color': 'white'}
     if days_count < 3:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': {'font-size': 25, 'color': 'white'}} for i in
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
                  range(1, days_count)}
     elif days_count < 7:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': {'font-size': 25, 'color': 'white'}} for i in
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
                  [1, 2, 3]}
     elif days_count < 14:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': {'font-size': 25, 'color': 'white'}} for i in
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
                  [1, 2, 3, 7]}
     elif days_count < 21:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': {'font-size': 25, 'color': 'white'}} for i in
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
                  [1, 2, 3, 7, 14]}
     elif days_count < 28:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': {'font-size': 25, 'color': 'white'}} for i in
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
                  [1, 2, 3, 7, 14, 21]}
     else:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': {'font-size': 25, 'color': 'white'}} for i in
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
                  [1, 2, 3, 7, 14, 21, 28]}
 
     if days_count < 28:
@@ -33,59 +33,86 @@ def generate_slider_marks(days_count, tick_postfix):
 
 def get_rainfall_sum_per_day(data_source, day_count):
     df = pd.read_json(data_source)
-    df_sum_per_day = df.groupby(["day", "month", "year"], as_index=False) \
-        .sum() \
-        .sort_values(by=['year', 'month', 'day'])
-    return df_sum_per_day.iloc[-day_count:]
-
-
-def get_rainfall_sum_per_month(data_source, month_count):
-    df = pd.read_json(data_source)
-    df_sum_per_day = df.groupby(["month", "year"], as_index=False) \
-        .sum() \
-        .sort_values(by=['year', 'month'])
-    return df_sum_per_day.iloc[-month_count:]
-
-
-def get_rainfall_sum_per_year(data_source, year_count):
-    df = pd.read_json(data_source)
-    df_sum_per_year = df.groupby(["year"], as_index=False) \
-        .sum() \
-        .sort_values(by=['year'])
-    return df_sum_per_year.iloc[-year_count:]
-
-
-def get_rainfall_sum_for_day_for_current_month(data_source):
-    df = pd.read_json(data_source)
-    df = df.loc[(df['month'] == 1) & (df['year'] == 2022)]
-    df_sum_per_day = df.groupby(["day", "month", "year"], as_index=False) \
-        .sum() \
-        .sort_values(by=['day'])
+    start_date = (datetime.now() - relativedelta(days=day_count-1))\
+        .replace(hour=0,
+                 minute=0,
+                 second=0,
+                 microsecond=0)
+    df = df.loc[df['date'] > start_date]
+    df['year'] = df['date'].dt.year
+    df['month'] = df['date'].dt.strftime('%m')
+    df['day'] = df['date'].dt.strftime('%d')
+    df_sum_per_day = df.groupby(["year", "month", "day"]).sum().reset_index()
+    df_sum_per_day = df_sum_per_day.sort_values(by=["year", "month", "day"])
     return df_sum_per_day
 
 
-def get_rainfall_sum_for_month_for_current_year(data_source):
+def get_rainfall_sum(data_source, day_count):
     df = pd.read_json(data_source)
-    df = df.loc[df['year'] == 2022]
-    df_sum_per_month = df.groupby(["month", "year"], as_index=False) \
-        .sum() \
-        .sort_values(by=['month'])
-    return df_sum_per_month
-
-
-def get_rainfall_sum_for_each_year(data_source):
-    df = pd.read_json(data_source)
-    df_sum_per_year = df.groupby(["year"], as_index=False) \
-        .sum() \
-        .sort_values(by=['year'])
-    return df_sum_per_year
-
-
-def month_number_to_name_pl(number):
-    return format_datetime(datetime.strptime(str(number), "%m"), format="MMM", locale='pl')
+    start_date = (datetime.now() - relativedelta(days=day_count-1))\
+        .replace(hour=0,
+                 minute=0,
+                 second=0,
+                 microsecond=0)
+    df = df.loc[df['date'] > start_date]
+    rainfall_sum = df['rainfall'].sum()
+    return rainfall_sum
 
 
 def degrees_to_compass(degrees):
     val = int((degrees / 22.5) + .5)
     arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
     return arr[(val % 16)]
+
+
+def get_measurements(data_source, days):
+    df = pd.read_json(data_source)
+    start_date = (datetime.now() - relativedelta(days=days-1))\
+        .replace(hour=0,
+                 minute=0,
+                 second=0,
+                 microsecond=0)
+    df = df.loc[df['date'] > start_date]
+    df = df.sort_values(by=['date'])
+    return df
+
+
+def apply_common_chart_features(fig):
+    BACKGROUND_COLOR = "#5D5C61"
+    fig.update_layout(xaxis_title='Dzień')
+    fig.update_layout(
+        xaxis=dict(
+            tickfont=dict(size=12),
+        automargin=True,
+        tickangle=45))
+    fig.update_layout(
+        yaxis=dict(
+            tickfont=dict(size=12)))
+    fig.update_layout(xaxis_dtick="n")
+    fig.update_layout(showlegend=False)
+    fig.update_layout(transition_duration=500)
+    fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
+    fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
+    fig.update_layout(font={"color": "white", "size": 18})
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor='darkseagreen',
+            font_size=20,
+            font_family="Lucida Console"
+        )
+    )
+    fig.update_layout(
+        title={
+            'y': 1.0,
+            'x': 0.0,
+            'xanchor': 'left',
+            'yanchor': 'auto'})
+    fig.update_layout(height=500)
+
+    return  fig
+
+def apply_common_line_chart_features(fig):
+    fig.update_traces(marker={'size': 8})
+    fig.update_traces(mode='lines+markers')
+
+    return fig

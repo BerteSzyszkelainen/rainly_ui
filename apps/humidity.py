@@ -6,13 +6,13 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_year, get_rainfall_sum_for_each_year, \
-    get_rainfall_sum_per_day, month_number_to_name_pl
+from utilities.utilities import generate_slider_marks, apply_common_line_chart_features, get_measurements, \
+    apply_common_chart_features
 
 from app import app
 
 BACKGROUND_COLOR = "#5D5C61"
-DATA_SOURCE = r"https://rainly-api.herokuapp.com/get_measurements"
+DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
 
 
 layout = html.Div(
@@ -40,7 +40,7 @@ layout = html.Div(
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
                 dcc.Slider(
                     id="slider-humidity",
-                    min=0,
+                    min=1,
                     value=7,
                 )
             ]
@@ -74,44 +74,18 @@ layout = html.Div(
 )
 def update_line_chart(day_count, n):
 
-    df = pd.read_json(DATA_SOURCE).sort_values(by=['year', 'month', 'day']).iloc[-day_count:]
+    df = get_measurements(DATA_SOURCE, day_count)
 
     if df.empty:
         return {}, {'display': 'none'}
     else:
-        fig = px.line(df,
-                     x=df["day"].apply(str) + " " +
-                       df["month"].apply(lambda x: month_number_to_name_pl(x)) + " " +
-                       df["year"].apply(str),
-                     y=df["humidity"])
+        fig = px.line(df, x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["humidity"])
+        fig = apply_common_chart_features(fig)
+        fig = apply_common_line_chart_features(fig)
         fig.update_layout(yaxis_range=[0, 100])
-        fig.update_layout(xaxis_title="Dzień")
-        fig.update_layout(xaxis_dtick="n")
         fig.update_layout(yaxis_title="%")
-        fig.update_layout(showlegend=False)
-        fig.update_layout(transition_duration=500)
-        fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-        fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-        fig.update_traces(marker={'size': 12})
-        fig.update_traces(mode='lines+markers')
         fig.update_traces(line_color='aqua')
-        fig.update_layout(font={"color": "white", "size": 18})
         fig.update_traces(hovertemplate="Data: %{x}<br>Wilgotność: %{y} %")
-        fig.update_layout(
-            hoverlabel=dict(
-                bgcolor='darkseagreen',
-                font_size=20,
-                font_family="Lucida Console"
-            )
-        )
-        fig.update_layout(
-            title={
-                'y': 1.0,
-                'x': 0.0,
-                'xanchor': 'left',
-                'yanchor': 'auto'})
-        fig.update_layout(height=400)
-        fig.update_layout(margin=dict(l=20, r=20, t=30, b=20))
 
         return fig, {'display': 'block'}
 
@@ -141,7 +115,7 @@ def update_slider(n):
     if df.empty:
         return None, {}, {'display': 'none'}
     else:
-        day_count = df.groupby(["day", "month"], as_index=False).ngroups
+        day_count = df.groupby([df["date"].dt.year, df["date"].dt.month, df["date"].dt.day], as_index=False).ngroups
         if day_count > 28:
             day_count = 28
         return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}

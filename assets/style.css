@@ -21,6 +21,11 @@ body {
     background-size: cover;
 }
 
+#div-timer {
+    font-size: 20px;
+    color: white;
+}
+
 [id^=label-timer] {
     text-align: right;
     font-size: 20px;
@@ -50,9 +55,18 @@ body {
     text-align: left;
     position: center;
     margin: 0 auto;
-    width: 100%;
+    width: 80%;
     font-size: 30px;
-    margin-bottom: 75px;
+    margin-bottom: 20px;
+}
+
+#slider-rainfall-output {
+    text-align: center;
+    position: center;
+    margin: 0 auto;
+    width: 80%;
+    font-size: 30px;
+    margin-top: 60px;
 }
 
 #div-navigation {
@@ -89,7 +103,7 @@ body {
 }
 
 [id^=div-bar-chart] {
-    margin-bottom: 60px;
+    margin-bottom: 30px;
 }
 
 #div-info {
