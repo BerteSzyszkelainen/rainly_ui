@@ -35,6 +35,10 @@ layout = html.Div(
             ]
         ),
         html.Div(
+            id="div-current-temperature",
+            children=html.Label(id='label-current-temperature')
+        ),
+        html.Div(
             id="div-slider-temperature",
             children=[
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
@@ -83,7 +87,7 @@ def update_line_chart(day_count, n):
         fig = apply_common_line_chart_features(fig)
         fig.update_layout(yaxis_range=[-40, 50])
         fig.update_layout(yaxis_title='°C')
-        fig.update_traces(line_color='red')
+        fig.update_traces(line_color='#800000')
         fig.update_traces(hovertemplate='Data: %{x}<br>Temperatura: %{y}°C')
 
         return fig, {'display': 'block'}
@@ -98,6 +102,15 @@ def update_warning(n):
 
     if df.empty:
         return {'display': 'block'}
+
+@app.callback(
+    Output(component_id='label-current-temperature', component_property='children'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_current_temperature(n):
+    current_temperature = pd.read_json(DATA_SOURCE).iloc[-1]['temperature']
+
+    return f"Aktualna temperatura: {current_temperature}°C"
 
 
 @app.callback(

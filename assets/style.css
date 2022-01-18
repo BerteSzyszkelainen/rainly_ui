@@ -51,6 +51,22 @@ body {
     font-size: 20px;
 }
 
+#div-current-temperature {
+    margin-top: 80px;
+    background-color: #800000;
+    width: 40%;
+    height: 50px;
+    position: center;
+    margin: 0 auto;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+}
+
+#label-current-temperature {
+    font-size: 20px;
+}
+
 [id^=div-slider] {
     text-align: left;
     position: center;

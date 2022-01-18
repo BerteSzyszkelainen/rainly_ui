@@ -115,7 +115,7 @@ def apply_common_chart_features(fig):
             'x': 0.0,
             'xanchor': 'left',
             'yanchor': 'auto'})
-    fig.update_layout(height=500)
+    fig.update_layout(height=600)
 
     return  fig
 
