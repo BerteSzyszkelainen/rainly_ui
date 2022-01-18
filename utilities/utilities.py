@@ -3,7 +3,13 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 
-DATA_SOURCE = r"http://127.0.0.1:5000/get_measurements"
+def read_configuration():
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    return config
+
+CONFIG = read_configuration()
+DATA_SOURCE = CONFIG['DATA']['source']
 
 def generate_slider_marks(days_count, tick_postfix):
     style = {'font-size': 20, 'color': 'white'}
@@ -118,8 +124,3 @@ def apply_common_line_chart_features(fig):
     fig.update_traces(mode='lines+markers')
 
     return fig
-
-def read_configuration():
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    return config
