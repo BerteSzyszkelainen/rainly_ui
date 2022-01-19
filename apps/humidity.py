@@ -35,6 +35,10 @@ layout = html.Div(
             ]
         ),
         html.Div(
+            id="div-current-humidity",
+            children=html.Label(id='label-current-humidity')
+        ),
+        html.Div(
             id="div-slider-humidity",
             children=[
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
@@ -84,7 +88,7 @@ def update_line_chart(day_count, n):
         fig = apply_common_line_chart_features(fig)
         fig.update_layout(yaxis_range=[0, 100])
         fig.update_layout(yaxis_title="%")
-        fig.update_traces(line_color='aqua')
+        fig.update_traces(line_color='#00ccff')
         fig.update_traces(hovertemplate="Data: %{x}<br>Wilgotność: %{y} %")
 
         return fig, {'display': 'block'}
@@ -100,6 +104,15 @@ def update_warning(n):
 
     if df.empty:
         return {'display': 'block'}
+
+@app.callback(
+    Output(component_id='label-current-humidity', component_property='children'),
+    Input(component_id='interval-timer', component_property='n_intervals')
+)
+def update_current_humidity(n):
+    current_humidity = pd.read_json(DATA_SOURCE).iloc[-1]['humidity']
+
+    return f"Aktualnie: {current_humidity} %"
 
 
 @app.callback(

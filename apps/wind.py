@@ -36,6 +36,10 @@ layout = html.Div(
             ]
         ),
         html.Div(
+            id="div-current-wind",
+            children=html.Label(id='label-current-wind')
+        ),
+        html.Div(
             id="div-slider-wind",
             children=[
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
@@ -178,6 +182,19 @@ def update_warning(n):
 
     if df.empty:
         return {'display': 'block'}
+
+@app.callback(
+    Output(component_id='label-current-wind', component_property='children'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_current_wind(n):
+    current_wind_speed_avg = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_avg']
+    current_wind_speed_max = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_max']
+    current_wind_direction = pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction']
+
+    return [f"Aktualnie: {current_wind_speed_avg} km/h, "
+            f"(maks. {current_wind_speed_max} km/h), "
+            f"{degrees_to_compass(current_wind_direction)}"]
 
 
 @app.callback(

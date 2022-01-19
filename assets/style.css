@@ -51,9 +51,8 @@ body {
     font-size: 20px;
 }
 
-#div-current-temperature {
+[id^=div-current] {
     margin-top: 80px;
-    background-color: #800000;
     width: 40%;
     height: 50px;
     position: center;
@@ -63,7 +62,119 @@ body {
     line-height: 50px;
 }
 
-#label-current-temperature {
+#label-current-wind-home-page {
+    font-size: 15px;
+}
+
+#label-current-pressure-home-page {
+    font-size: 15px;
+}
+
+#label-current-humidity-home-page {
+    font-size: 15px;
+}
+
+#label-current-temperature-home-page {
+    font-size: 15px;
+}
+
+#label-rainfall-24h-home-page {
+    font-size: 15px;
+}
+
+#div-current-measurements {
+    display:table;
+    width: 94%;
+}
+
+#div-current-measurements-row {
+    display:table-row;
+}
+
+#div-current-temperature-home-page {
+    display:table-cell;
+    background-color: #f95959;
+    width:10%;
+    padding:1px;
+}
+
+#div-current-humidity-home-page {
+    display:table-cell;
+    background-color: #00ccff;
+    width:10%;
+    padding:1px;
+}
+
+#div-current-pressure-home-page {
+    display:table-cell;
+    background-color: #ff6f3c;
+    width:10%;
+    padding:1px;
+}
+
+#div-rainfall-24h-home-page {
+    display:table-cell;
+    background-color: #5585b5;
+    width:10%;
+    padding: 1px;
+}
+
+#div-current-wind-home-page {
+    display:table-cell;
+    background-color: #f1b963;
+    width:30%;
+    padding:1px;
+}
+
+
+[id$=home-page] {
+    margin-top: 80px;
+    width: 40%;
+    height: 50px;
+    position: center;
+    margin: 0 auto;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+}
+
+#div-rainfall-24h {
+    margin-top: 80px;
+    width: 40%;
+    height: 50px;
+    position: center;
+    margin: 0 auto;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+}
+
+#div-rainfall-24h {
+    background-color: #5585b5;
+}
+
+#div-current-temperature {
+    background-color: #f95959;
+}
+
+#div-current-humidity {
+    background-color: #00ccff;
+}
+
+#div-current-pressure {
+    background-color: #ff6f3c;
+}
+
+#div-current-wind {
+    background-color: #f1b963;
+}
+
+[id^=label-current] {
+    font-size: 20px;
+    display: block;
+}
+
+#label-rainfall-24h {
     font-size: 20px;
 }
 

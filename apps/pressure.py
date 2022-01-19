@@ -35,6 +35,10 @@ layout = html.Div(
             ]
         ),
         html.Div(
+            id="div-current-pressure",
+            children=html.Label(id='label-current-pressure')
+        ),
+        html.Div(
             id="div-slider-pressure",
             children=[
                 html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
@@ -84,7 +88,7 @@ def update_line_chart(day_count, n):
         fig = apply_common_line_chart_features(fig)
         fig.update_layout(yaxis_range=[900, 1200])
         fig.update_layout(yaxis_title="hPa")
-        fig.update_traces(line_color='fuchsia')
+        fig.update_traces(line_color='#ff6f3c')
         fig.update_traces(hovertemplate="Data: %{x}<br>Ciśnienie atmosferyczne: %{y} hPa")
 
         return fig, {'display': 'block'}
@@ -101,6 +105,14 @@ def update_warning(n):
     if df.empty:
         return {'display': 'block'}
 
+@app.callback(
+    Output(component_id='label-current-pressure', component_property='children'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_current_pressure(n):
+    current_pressure = pd.read_json(DATA_SOURCE).iloc[-1]['pressure']
+
+    return f"Aktualnie: {current_pressure} hPa"
 
 @app.callback(
     Output(component_id='slider-pressure', component_property='max'),

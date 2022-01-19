@@ -6,6 +6,8 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+from dateutil.relativedelta import relativedelta
+
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, apply_common_chart_features, \
     get_total_rainfall_sum, read_configuration
 from app import app
@@ -33,6 +35,10 @@ layout = html.Div(
                 dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
+        ),
+        html.Div(
+            id="div-rainfall-24h",
+            children=html.Label(id='label-rainfall-24h')
         ),
         html.Div(
             id="div-slider-rainfall",
@@ -98,6 +104,17 @@ def update_warning(n):
     if df.empty:
         return {'display': 'block'}
 
+@app.callback(
+    Output(component_id='label-rainfall-24h', component_property='children'),
+    Input(component_id='interval-measurement', component_property='n_intervals')
+)
+def update_rainfall_24h(n):
+    df = pd.read_json(DATA_SOURCE)
+    start_date = datetime.now() - relativedelta(days=1)
+    df = df.loc[df['date'] > start_date]
+    rainfall_24h = df['rainfall'].sum()
+    return f"Ostatnie 24h: {rainfall_24h} mm"
+
 
 @app.callback(
     Output(component_id='slider-rainfall', component_property='max'),
@@ -130,5 +147,8 @@ def update_timer(n):
 )
 def update_total_rainfall_sum(day_count):
     rainfall_sum = get_total_rainfall_sum(day_count)
-    return "Suma całkowita: {} mm".format(rainfall_sum)
+    if day_count == 1:
+        return f"Dzisiaj: {rainfall_sum} mm"
+    else:
+        return f"Ostatnie {day_count} dni: {rainfall_sum} mm"
 

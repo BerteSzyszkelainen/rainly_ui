@@ -63,7 +63,7 @@ def get_total_rainfall_sum(day_count):
                  second=0,
                  microsecond=0)
     df = df.loc[df['date'] > start_date]
-    rainfall_sum = df['rainfall'].sum()
+    rainfall_sum = round(df['rainfall'].sum(), 2)
     return rainfall_sum
 
 

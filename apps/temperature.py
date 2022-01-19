@@ -87,7 +87,7 @@ def update_line_chart(day_count, n):
         fig = apply_common_line_chart_features(fig)
         fig.update_layout(yaxis_range=[-40, 50])
         fig.update_layout(yaxis_title='°C')
-        fig.update_traces(line_color='#800000')
+        fig.update_traces(line_color='#f95959')
         fig.update_traces(hovertemplate='Data: %{x}<br>Temperatura: %{y}°C')
 
         return fig, {'display': 'block'}
@@ -110,7 +110,7 @@ def update_warning(n):
 def update_current_temperature(n):
     current_temperature = pd.read_json(DATA_SOURCE).iloc[-1]['temperature']
 
-    return f"Aktualna temperatura: {current_temperature}°C"
+    return f"Aktualnie: {current_temperature} °C"
 
 
 @app.callback(
