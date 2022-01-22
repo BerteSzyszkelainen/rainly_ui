@@ -36,7 +36,22 @@ layout = html.Div(
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
-        dbc.Card(color="#f1b963", id='current-wind'),
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(
+                    color="#f1b963",
+                    inverse=True,
+                    id='current-wind-avg')),
+                dbc.Col(dbc.Card(
+                    color="#f1b963", inverse=True,
+                    id='current-wind-max')),
+                dbc.Col(dbc.Card(
+                    color="#f1b963",
+                    inverse=True,
+                    id='current-wind-direction')),
+            ],
+            className="mb-4",
+        ),
         html.Div(
             id="div-slider-wind",
             children=[
@@ -49,16 +64,16 @@ layout = html.Div(
             ]
         ),
         html.Div(
+            id="div-line-chart-wind",
+            children=dcc.Loading(children=dcc.Graph(id="line-chart-wind"))
+        ),
+        html.Div(
             id="div-bar-polar-chart-wind-avg",
             children=dcc.Loading(children=dcc.Graph(id="bar-polar-chart-wind-avg"))
         ),
         html.Div(
             id="div-bar-polar-chart-wind-max",
             children=dcc.Loading(children=dcc.Graph(id="bar-polar-chart-wind-max"))
-        ),
-        html.Div(
-            id="div-line-chart-wind",
-            children=dcc.Loading(children=dcc.Graph(id="line-chart-wind"))
         ),
         html.Div(
             id="div-warning-wind",
@@ -157,16 +172,14 @@ def update_line_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_avg"], name='średnia'))
-        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_max"], name='maksymalna'))
+        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_avg"], name="prędkość średnia"))
+        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_max"], name="prędkość maksymalna"))
         fig = apply_common_chart_features(fig)
         fig = apply_common_line_chart_features(fig)
+        fig.update_layout(showlegend=True)
         fig.update_layout(yaxis_range=[0, 150])
         fig.update_layout(yaxis_title="km/h")
-        fig.update_traces(hovertemplate="Data: %{x}<br>Prędkość wiatru: %{y} km/h")
-        fig.update_layout(
-            title="Prędkość wiatru w czasie"
-        )
+        fig.update_traces(hovertemplate="Data: %{x}<br>Prędkość: %{y} km/h <extra></extra>")
 
         return fig, {'display': 'block'}
 
@@ -182,17 +195,18 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='current-wind', component_property='children'),
+    Output(component_id='current-wind-avg', component_property='children'),
+    Output(component_id='current-wind-max', component_property='children'),
+    Output(component_id='current-wind-direction', component_property='children'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_wind(n):
     current_wind_speed_avg = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_avg']
     current_wind_speed_max = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_max']
     current_wind_direction = degrees_to_compass(pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction'])
-    return get_card_content("Aktualnie:",
-                            f"średnio: {current_wind_speed_avg} km/h "
-                            f"maksymalnie: {current_wind_speed_max} km/h "
-                            f"kierunek: {current_wind_direction}")
+    return [get_card_content("Prędkość średnia", f"{current_wind_speed_avg} km/h"),
+    get_card_content("Prędkość maksymalna", f"{current_wind_speed_max} km/h"),
+    get_card_content("Kierunek", f"{current_wind_direction}")]
 
 
 @app.callback(

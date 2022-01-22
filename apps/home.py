@@ -53,10 +53,19 @@ layout = html.Div(
                 dbc.Row(
                     [
                         dbc.Col(dbc.Card(
-                            get_card_content("Wiatr:", "średnio: 10 km/h maksymalnie: 17 km/h kierunek: E"),
+                            get_card_content("Wiatr prędkość średnia", "10 km/h"),
                             color="#f1b963",
                             inverse=True,
-                            id='home-current-wind'))
+                            id='home-current-wind')),
+                        dbc.Col(dbc.Card(
+                            get_card_content("Wiatr prędkość maksymalna", "21 km/h"),
+                            color="#f1b963", inverse=True,
+                            id='home-current-wind')),
+                        dbc.Col(dbc.Card(
+                            get_card_content("Wiatr kierunek", 'E'),
+                            color="#f1b963",
+                            inverse=True,
+                            id='home-current-wind')),
                     ],
                     className="mb-4",
                 ),
