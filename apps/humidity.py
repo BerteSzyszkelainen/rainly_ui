@@ -31,11 +31,13 @@ layout = html.Div(
                 dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
                 dcc.Link(id='home', className="active", children='Wilgotność', href='/apps/humidity'),
                 dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-                dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
-                dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
+                dcc.Link(id='home', children='Wiatr', href='/apps/wind')
             ]
         ),
-        dbc.Card(color="#00ccff", id='current-humidity'),
+        html.Div(
+            className="cards-container",
+            children=dbc.Card(color="#00ccff", id='current-humidityy')
+        ),
         html.Div(
             id="div-slider-humidity",
             children=[
@@ -62,7 +64,7 @@ layout = html.Div(
         ),
         dcc.Interval(
             id='interval-measurement',
-            interval=60 * 1000,
+            interval=5 * 60 * 1000,
             n_intervals=0
         )
 ])
@@ -104,7 +106,7 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='current-humidity', component_property='children'),
+    Output(component_id='current-humidityy', component_property='children'),
     Input(component_id='interval-timer', component_property='n_intervals')
 )
 def update_current_humidity(n):

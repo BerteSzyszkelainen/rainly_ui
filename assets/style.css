@@ -21,17 +21,13 @@ body {
     background-size: cover;
 }
 
-#div-timer {
-    font-size: 20px;
-    color: white;
-}
-
 [id^=label-timer] {
     text-align: right;
     font-size: 20px;
     margin-bottom: 5px;
     display: block;
     margin: 3%;
+    color: white;
 }
 
 #label-timer-home {
@@ -52,12 +48,7 @@ body {
 }
 
 [id^=current] {
-    margin: 3%;
-    font-size: 30px;
-}
-
-[id^=home-current] {
-    font-size: 30px;
+    font-size: 23px;
 }
 
 [id^=div-slider] {
@@ -103,14 +94,6 @@ body {
   color: white;
 }
 
-[id^=div-bar-chart] {
-    margin-bottom: 30px;
-}
-
-#div-info {
-    font-size: 40px;
-}
-
 .cards-container {
-  margin: 6%;
+  margin: 5%;
 }

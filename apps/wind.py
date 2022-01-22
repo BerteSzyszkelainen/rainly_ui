@@ -1,6 +1,5 @@
 from datetime import datetime
 import pandas as pd
-import plotly.express as px
 import pytz
 from babel.dates import format_datetime
 from dash import dcc
@@ -32,25 +31,27 @@ layout = html.Div(
                 dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
                 dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
                 dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-                dcc.Link(id='home', className="active", children='Wiatr', href='/apps/wind'),
-                dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
+                dcc.Link(id='home', className="active", children='Wiatr', href='/apps/wind')
             ]
         ),
-        dbc.Row(
-            [
-                dbc.Col(dbc.Card(
-                    color="#f1b963",
-                    inverse=True,
-                    id='current-wind-avg')),
-                dbc.Col(dbc.Card(
-                    color="#f1b963", inverse=True,
-                    id='current-wind-max')),
-                dbc.Col(dbc.Card(
-                    color="#f1b963",
-                    inverse=True,
-                    id='current-wind-direction')),
-            ],
-            className="mb-4",
+        html.Div(
+            className="cards-container",
+            children=dbc.Row(
+                children=[
+                    dbc.Col(dbc.Card(
+                        color="#f1b963",
+                        inverse=True,
+                        id='current-wind-avg')),
+                    dbc.Col(dbc.Card(
+                        color="#f1b963", inverse=True,
+                        id='current-wind-max')),
+                    dbc.Col(dbc.Card(
+                        color="#f1b963",
+                        inverse=True,
+                        id='current-wind-direction')),
+                ],
+                className="mb-4",
+            )
         ),
         html.Div(
             id="div-slider-wind",
@@ -68,14 +69,6 @@ layout = html.Div(
             children=dcc.Loading(children=dcc.Graph(id="line-chart-wind"))
         ),
         html.Div(
-            id="div-bar-polar-chart-wind-avg",
-            children=dcc.Loading(children=dcc.Graph(id="bar-polar-chart-wind-avg"))
-        ),
-        html.Div(
-            id="div-bar-polar-chart-wind-max",
-            children=dcc.Loading(children=dcc.Graph(id="bar-polar-chart-wind-max"))
-        ),
-        html.Div(
             id="div-warning-wind",
             children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
         ),
@@ -86,76 +79,10 @@ layout = html.Div(
         ),
         dcc.Interval(
             id='interval-measurement',
-            interval=60 * 1000,
+            interval=5 * 60 * 1000,
             n_intervals=0
         )
 ])
-
-
-@app.callback(
-    Output(component_id='bar-polar-chart-wind-avg', component_property='figure'),
-    Output(component_id='bar-polar-chart-wind-avg', component_property='style'),
-    Input(component_id='slider-wind', component_property='value'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_bar_polar_chart_wind_avg(day_count, n):
-
-    df = pd.read_json(DATA_SOURCE)
-    df["wind_direction_compass"] = df["wind_direction"].apply(lambda x: degrees_to_compass(x))
-    df = df.groupby(["wind_direction_compass", "wind_speed_avg"]).size().reset_index(name="wind_frequency")
-
-    if df.empty:
-        return {}, {'display': 'none'}
-    else:
-        fig = px.bar_polar(df,
-                           r="wind_frequency",
-                           theta="wind_direction_compass",
-                           color="wind_speed_avg",
-                           template="plotly_dark",
-                           color_discrete_sequence=px.colors.sequential.Plasma,
-                           title="Rozkład kierunków średniej prędkości wiatru",
-                           labels={"wind_speed_avg": "Prędkość wiatru (km/h)",
-                                   "wind_direction_compass": "Kierunek wiatru",
-                                   "wind_frequency": "Krotność wystąpienia pomiaru"})
-        fig.update_layout(font={"color": "white", "size": 14})
-        fig.update_layout(height=600)
-        fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-        fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-
-        return fig, {'display': 'block'}
-
-@app.callback(
-    Output(component_id='bar-polar-chart-wind-max', component_property='figure'),
-    Output(component_id='bar-polar-chart-wind-max', component_property='style'),
-    Input(component_id='slider-wind', component_property='value'),
-    Input(component_id='interval-measurement', component_property='n_intervals')
-)
-def update_bar_polar_chart_wind_max(day_count, n):
-
-    df = pd.read_json(DATA_SOURCE)
-    df["wind_direction_compass"] = df["wind_direction"].apply(lambda x: degrees_to_compass(x))
-    df = df.groupby(["wind_direction_compass", "wind_speed_max"]).size().reset_index(name="wind_frequency")
-
-    if df.empty:
-        return {}, {'display': 'none'}
-    else:
-        fig = px.bar_polar(df,
-                           r="wind_frequency",
-                           theta="wind_direction_compass",
-                           color="wind_speed_max",
-                           template="plotly_dark",
-                           color_discrete_sequence=px.colors.sequential.Plasma,
-                           title="Rozkład kierunków maksymalnej prędkości wiatru",
-                           labels={"wind_speed_max": "Prędkość wiatru (km/h)",
-                                   "wind_direction_compass": "Kierunek wiatru",
-                                   "wind_frequency": "Krotność wystąpienia pomiaru"}
-                           )
-        fig.update_layout(font={"color": "white", "size": 14})
-        fig.update_layout(height=600)
-        fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
-        fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-
-        return fig, {'display': 'block'}
 
 
 @app.callback(
@@ -172,8 +99,8 @@ def update_line_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_avg"], name="prędkość średnia"))
-        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_max"], name="prędkość maksymalna"))
+        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_avg"], name="prędkość śr."))
+        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_max"], name="prędkość maks."))
         fig = apply_common_chart_features(fig)
         fig = apply_common_line_chart_features(fig)
         fig.update_layout(showlegend=True)
@@ -204,8 +131,8 @@ def update_current_wind(n):
     current_wind_speed_avg = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_avg']
     current_wind_speed_max = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_max']
     current_wind_direction = degrees_to_compass(pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction'])
-    return [get_card_content("Prędkość średnia", f"{current_wind_speed_avg} km/h"),
-    get_card_content("Prędkość maksymalna", f"{current_wind_speed_max} km/h"),
+    return [get_card_content("Prędkość śr.", f"{current_wind_speed_avg} km/h"),
+    get_card_content("Prędkość maks.", f"{current_wind_speed_max} km/h"),
     get_card_content("Kierunek", f"{current_wind_direction}")]
 
 

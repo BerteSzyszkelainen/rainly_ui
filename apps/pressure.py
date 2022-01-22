@@ -32,11 +32,13 @@ layout = html.Div(
                 dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
                 dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
                 dcc.Link(id='home', className="active", children='Ciśnienie', href='/apps/pressure'),
-                dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
-                dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
+                dcc.Link(id='home', children='Wiatr', href='/apps/wind')
             ]
         ),
-        dbc.Card(color="#ff8c69", id='current-pressure'),
+        html.Div(
+            className="cards-container",
+            children=dbc.Card(color="#ff8c69", id='current-pressure')
+        ),
         html.Div(
             id="div-slider-pressure",
             children=[
@@ -63,7 +65,7 @@ layout = html.Div(
         ),
         dcc.Interval(
             id='interval-measurement',
-            interval=60 * 1000,
+            interval=5 * 60 * 1000,
             n_intervals=0
         )
 ])
