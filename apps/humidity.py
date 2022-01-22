@@ -7,7 +7,8 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features, read_configuration
+    apply_common_chart_features, read_configuration, get_card_content
+import dash_bootstrap_components as dbc
 from app import app
 
 CONFIG = read_configuration()
@@ -34,10 +35,7 @@ layout = html.Div(
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
-        html.Div(
-            id="div-current-humidity",
-            children=html.Label(id='label-current-humidity')
-        ),
+        dbc.Card(color="#00ccff", id='current-humidity'),
         html.Div(
             id="div-slider-humidity",
             children=[
@@ -106,13 +104,12 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='label-current-humidity', component_property='children'),
+    Output(component_id='current-humidity', component_property='children'),
     Input(component_id='interval-timer', component_property='n_intervals')
 )
 def update_current_humidity(n):
     current_humidity = pd.read_json(DATA_SOURCE).iloc[-1]['humidity']
-
-    return f"Aktualnie: {current_humidity} %"
+    return get_card_content("Aktualnie", f"{current_humidity} %")
 
 
 @app.callback(

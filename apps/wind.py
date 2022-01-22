@@ -8,7 +8,8 @@ from dash import html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 from utilities.utilities import generate_slider_marks, degrees_to_compass, apply_common_line_chart_features, \
-    get_measurements, apply_common_chart_features, read_configuration
+    get_measurements, apply_common_chart_features, read_configuration, get_card_content
+import dash_bootstrap_components as dbc
 from app import app
 
 CONFIG = read_configuration()
@@ -35,10 +36,7 @@ layout = html.Div(
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
-        html.Div(
-            id="div-current-wind",
-            children=html.Label(id='label-current-wind')
-        ),
+        dbc.Card(color="#f1b963", id='current-wind'),
         html.Div(
             id="div-slider-wind",
             children=[
@@ -184,17 +182,17 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='label-current-wind', component_property='children'),
+    Output(component_id='current-wind', component_property='children'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_wind(n):
     current_wind_speed_avg = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_avg']
     current_wind_speed_max = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_max']
-    current_wind_direction = pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction']
-
-    return [f"Aktualnie: {current_wind_speed_avg} km/h, "
-            f"(maks. {current_wind_speed_max} km/h), "
-            f"{degrees_to_compass(current_wind_direction)}"]
+    current_wind_direction = degrees_to_compass(pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction'])
+    return get_card_content("Aktualnie:",
+                            f"średnio: {current_wind_speed_avg} km/h "
+                            f"maksymalnie: {current_wind_speed_max} km/h "
+                            f"kierunek: {current_wind_direction}")
 
 
 @app.callback(

@@ -9,7 +9,8 @@ from dash.dependencies import Input, Output
 from dateutil.relativedelta import relativedelta
 
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, apply_common_chart_features, \
-    get_total_rainfall_sum, read_configuration
+    get_total_rainfall_sum, read_configuration, get_card_content
+import dash_bootstrap_components as dbc
 from app import app
 
 CONFIG = read_configuration()
@@ -36,10 +37,7 @@ layout = html.Div(
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
-        html.Div(
-            id="div-rainfall-24h",
-            children=html.Label(id='label-rainfall-24h')
-        ),
+        dbc.Card(color="#557A95", id='current-rainfall-24h'),
         html.Div(
             id="div-slider-rainfall",
             children=[
@@ -105,7 +103,7 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='label-rainfall-24h', component_property='children'),
+    Output(component_id='current-rainfall-24h', component_property='children'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_rainfall_24h(n):
@@ -113,7 +111,7 @@ def update_rainfall_24h(n):
     start_date = datetime.now() - relativedelta(days=1)
     df = df.loc[df['date'] > start_date]
     rainfall_24h = df['rainfall'].sum()
-    return f"Ostatnie 24h: {rainfall_24h} mm"
+    return get_card_content("Ostatnie 24h", f"{rainfall_24h} mm")
 
 
 @app.callback(

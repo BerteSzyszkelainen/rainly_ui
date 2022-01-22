@@ -7,7 +7,8 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, get_measurements, apply_common_line_chart_features, \
-    apply_common_chart_features, read_configuration
+    apply_common_chart_features, read_configuration, get_card_content
+import dash_bootstrap_components as dbc
 from app import app
 
 
@@ -34,10 +35,7 @@ layout = html.Div(
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
-        html.Div(
-            id="div-current-temperature",
-            children=html.Label(id='label-current-temperature')
-        ),
+        dbc.Card(color="#f95959", id='current-temperature'),
         html.Div(
             id="div-slider-temperature",
             children=[
@@ -104,13 +102,12 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='label-current-temperature', component_property='children'),
+    Output(component_id='current-temperature', component_property='children'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_temperature(n):
     current_temperature = pd.read_json(DATA_SOURCE).iloc[-1]['temperature']
-
-    return f"Aktualnie: {current_temperature} °C"
+    return get_card_content("Aktualnie", f"{current_temperature} °C")
 
 
 @app.callback(

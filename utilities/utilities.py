@@ -2,6 +2,8 @@ import configparser
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
+import dash_bootstrap_components as dbc
+from dash import html
 
 def read_configuration():
     config = configparser.ConfigParser()
@@ -124,3 +126,17 @@ def apply_common_line_chart_features(fig):
     fig.update_traces(mode='lines+markers')
 
     return fig
+
+def get_card_content(card_header, card_paragraph):
+    card_content = [
+        dbc.CardHeader(card_header),
+        dbc.CardBody(
+            [
+                html.P(
+                    card_paragraph,
+                    className="card-text",
+                )
+            ]
+        )
+    ]
+    return card_content

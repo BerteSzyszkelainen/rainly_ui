@@ -4,8 +4,10 @@ from dash import html
 from datetime import datetime
 from dash.dependencies import Input, Output
 from babel.dates import format_datetime
+import dash_bootstrap_components as dbc
 
 from app import app
+from utilities.utilities import get_card_content
 
 layout = html.Div(
     id="root-div-welcome",
@@ -27,34 +29,48 @@ layout = html.Div(
             ]
         ),
         html.Div(
-            id="div-welcome",
-            children=html.Label(id='label-welcome', children="Witaj w Rainly!")
-        ),
-        html.Div(
-            id="div-current-measurements",
-            children=html.Div(id="div-current-measurements-row", children=
-            [html.Div(
-                      id="div-current-temperature-home-page",
-                      children=html.Label(id='label-current-temperature-home-page', children="2 °C")
-                      ),
-                      html.Div(
-                          id="div-current-humidity-home-page",
-                          children=html.Label(id='label-current-humidity-home-page', children="2 %")
-                      ),
-                      html.Div(
-                          id="div-current-pressure-home-page",
-                          children=html.Label(id='label-current-pressure-home-page', children="2 hPa")
-                      ),
-                      html.Div(
-                          id="div-rainfall-24h-home-page",
-                          children=html.Label(id='label-rainfall-24h-home-page', children="2 mm")
-                      ),
-                      html.Div(
-                          id="div-current-wind-home-page",
-                          children=html.Label(id='label-current-wind-home-page', children="2 km/h (maks. 4 km/h), E")
-                      )
+            className="cards-container",
+            children=[
+                dbc.Row(
+                    [
+                        dbc.Col(dbc.Card(
+                            get_card_content("Opady 24h", '12 mm'),
+                            color="#5585b5",
+                            inverse=True,
+                            id='home-current-rainfall')),
+                        dbc.Col(dbc.Card(
+                            get_card_content("Temperatura", '10 °C'),
+                            color="#f95959", inverse=True,
+                            id='home-current-temperature')),
+                        dbc.Col(dbc.Card(
+                            get_card_content("Wilgotność", '83 %'),
+                            color="#00ccff",
+                            inverse=True,
+                            id='home-current-humidity')),
+                    ],
+                    className="mb-4",
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(dbc.Card(
+                            get_card_content("Wiatr:", "średnio: 10 km/h maksymalnie: 17 km/h kierunek: E"),
+                            color="#f1b963",
+                            inverse=True,
+                            id='home-current-wind'))
+                    ],
+                    className="mb-4",
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(dbc.Card(
+                            get_card_content("Ciśnienie", '1013 hPa'),
+                            color="#ff8c69",
+                            inverse=True,
+                            id='home-current-pressure')),
+                    ]
+                ),
             ]
-        )),
+        ),
         dcc.Interval(
             id='interval-timer',
             interval=1 * 1000,

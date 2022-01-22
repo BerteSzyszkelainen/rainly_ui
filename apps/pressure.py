@@ -7,8 +7,10 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features, read_configuration
+    apply_common_chart_features, read_configuration, get_card_content
+import dash_bootstrap_components as dbc
 from app import app
+
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
@@ -34,10 +36,7 @@ layout = html.Div(
                 dcc.Link(id='home', children='Moduł analityczny', href='/apps/analysis'),
             ]
         ),
-        html.Div(
-            id="div-current-pressure",
-            children=html.Label(id='label-current-pressure')
-        ),
+        dbc.Card(color="#ff8c69", id='current-pressure'),
         html.Div(
             id="div-slider-pressure",
             children=[
@@ -88,7 +87,7 @@ def update_line_chart(day_count, n):
         fig = apply_common_line_chart_features(fig)
         fig.update_layout(yaxis_range=[900, 1200])
         fig.update_layout(yaxis_title="hPa")
-        fig.update_traces(line_color='#ff6f3c')
+        fig.update_traces(line_color='#ff8c69')
         fig.update_traces(hovertemplate="Data: %{x}<br>Ciśnienie atmosferyczne: %{y} hPa")
 
         return fig, {'display': 'block'}
@@ -106,13 +105,12 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='label-current-pressure', component_property='children'),
+    Output(component_id='current-pressure', component_property='children'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_pressure(n):
     current_pressure = pd.read_json(DATA_SOURCE).iloc[-1]['pressure']
-
-    return f"Aktualnie: {current_pressure} hPa"
+    return get_card_content("Aktualnie", f"{current_pressure} hPa")
 
 @app.callback(
     Output(component_id='slider-pressure', component_property='max'),
