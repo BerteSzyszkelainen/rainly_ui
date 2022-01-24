@@ -111,7 +111,8 @@ def update_warning(n):
 )
 def update_current_humidity(n):
     current_humidity = pd.read_json(DATA_SOURCE).iloc[-1]['humidity']
-    return get_card_content("Aktualnie", f"{current_humidity} %")
+    last_measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
+    return get_card_content("Aktualnie", f"{current_humidity} %", f'Czas pomiaru: {last_measurement_time}')
 
 
 @app.callback(

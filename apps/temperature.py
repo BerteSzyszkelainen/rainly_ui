@@ -109,7 +109,8 @@ def update_warning(n):
 )
 def update_current_temperature(n):
     current_temperature = pd.read_json(DATA_SOURCE).iloc[-1]['temperature']
-    return get_card_content("Aktualnie", f"{current_temperature} °C")
+    last_measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
+    return get_card_content("Aktualnie", f"{current_temperature} °C", f'Czas pomiaru: {last_measurement_time}')
 
 
 @app.callback(

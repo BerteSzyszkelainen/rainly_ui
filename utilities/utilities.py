@@ -124,10 +124,9 @@ def apply_common_chart_features(fig):
 def apply_common_line_chart_features(fig):
     fig.update_traces(marker={'size': 8})
     fig.update_traces(mode='lines+markers')
-
     return fig
 
-def get_card_content(card_header, card_paragraph):
+def get_card_content(card_header, card_paragraph, card_footer):
     card_content = [
         dbc.CardHeader(card_header),
         dbc.CardBody(
@@ -137,6 +136,11 @@ def get_card_content(card_header, card_paragraph):
                     className="card-text",
                 )
             ]
+        ),
+        dbc.CardFooter(
+            children=card_footer,
+            style={'font-size': '12px', 'padding': '5px', "color": "white"}
         )
+
     ]
     return card_content

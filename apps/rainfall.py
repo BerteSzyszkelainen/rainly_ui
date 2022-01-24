@@ -113,7 +113,7 @@ def update_rainfall_24h(n):
     start_date = datetime.now() - relativedelta(days=1)
     df = df.loc[df['date'] > start_date]
     rainfall_24h = df['rainfall'].sum()
-    return get_card_content("Ostatnie 24h", f"{rainfall_24h} mm")
+    return get_card_content("Ostatnie 24h", f"{rainfall_24h} mm", f'Czas pomiaru: od {start_date.strftime("%d.%m, %H:%M")}')
 
 
 @app.callback(

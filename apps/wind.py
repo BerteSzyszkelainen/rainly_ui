@@ -6,7 +6,7 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
-from utilities.utilities import generate_slider_marks, degrees_to_compass, apply_common_line_chart_features, \
+from utilities.utilities import generate_slider_marks, degrees_to_compass, \
     get_measurements, apply_common_chart_features, read_configuration, get_card_content
 import dash_bootstrap_components as dbc
 from app import app
@@ -99,16 +99,51 @@ def update_line_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_avg"], name="prędkość śr."))
-        fig.add_trace(go.Scatter(x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["wind_speed_max"], name="prędkość maks."))
+
+        fig.add_trace(
+            go.Scatter(
+                x=df["date"].dt.strftime('%d.%m %H:%M'),
+                y=df["wind_speed_avg"],
+                name="prędkość śr.",
+                mode='lines+markers',
+                marker={'size': 8}
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=df["date"].dt.strftime('%d.%m %H:%M'),
+                y=df["wind_speed_max"],
+                name="prędkość maks.",
+                mode='lines+markers',
+                marker={'size': 8}
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=df["date"].dt.strftime('%d.%m %H:%M'),
+                y=df["wind_speed_max"]+20,
+                name="kierunek",
+                mode="markers+text",
+                text=df["wind_speed_max"].apply(lambda x: degrees_to_compass(x)),
+                textposition="top center",
+                textfont={
+                    'size': 12,
+                    'color': 'white'
+                },
+                marker={'size': 12}
+            )
+        )
+
         fig = apply_common_chart_features(fig)
-        fig = apply_common_line_chart_features(fig)
         fig.update_layout(showlegend=True)
         fig.update_layout(yaxis_range=[0, 150])
         fig.update_layout(yaxis_title="km/h")
         fig.update_traces(hovertemplate="Data: %{x}<br>Prędkość: %{y} km/h <extra></extra>")
 
         return fig, {'display': 'block'}
+
 
 @app.callback(
     Output(component_id='div-warning-wind', component_property='style'),
@@ -128,12 +163,15 @@ def update_warning(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_wind(n):
+    last_measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
     current_wind_speed_avg = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_avg']
     current_wind_speed_max = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_max']
     current_wind_direction = degrees_to_compass(pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction'])
-    return [get_card_content("Prędkość śr.", f"{current_wind_speed_avg} km/h"),
-    get_card_content("Prędkość maks.", f"{current_wind_speed_max} km/h"),
-    get_card_content("Kierunek", f"{current_wind_direction}")]
+    return [
+        get_card_content("Prędkość śr.", f"{current_wind_speed_avg} km/h", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Prędkość maks.", f"{current_wind_speed_max} km/h", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Kierunek", f"{current_wind_direction}", f'Czas pomiaru: {last_measurement_time}')
+    ]
 
 
 @app.callback(

@@ -48,7 +48,7 @@ body {
 }
 
 [id^=current] {
-    font-size: 23px;
+    font-size: 17px;
 }
 
 [id^=div-slider] {
@@ -95,5 +95,5 @@ body {
 }
 
 .cards-container {
-  margin: 5%;
+  margin: 4%;
 }

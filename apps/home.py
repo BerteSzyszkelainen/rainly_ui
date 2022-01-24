@@ -108,6 +108,7 @@ def update_timer(n):
 )
 def update_current_measurements(n):
     df = pd.read_json(DATA_SOURCE)
+    last_measurement_time =  df.iloc[-1]['date'].strftime("%d.%m, %H:%M")
     current_temperature = df.iloc[-1]['temperature']
     current_humidity = df.iloc[-1]['humidity']
     current_pressure = df.iloc[-1]['pressure']
@@ -118,11 +119,11 @@ def update_current_measurements(n):
     df = df.loc[df['date'] > start_date]
     rainfall_24h = df['rainfall'].sum()
     return [
-        get_card_content("Temperatura", f"{current_temperature} °C"),
-        get_card_content("Wilgotność", f"{current_humidity} %"),
-        get_card_content("Ciśnienie", f"{current_pressure} hPa"),
-        get_card_content("Opady 24h", f"{rainfall_24h} mm"),
-        get_card_content("Wiatr prędkość śr.", f"{current_wind_speed_avg} km/h"),
-        get_card_content("Wiatr prędkość max.", f"{current_wind_speed_max} km/h"),
-        get_card_content("Wiatr kierunek", f"{current_wind_direction}"),
+        get_card_content("Temperatura", f"{current_temperature} °C", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Wilgotność", f"{current_humidity} %", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Ciśnienie", f"{current_pressure} hPa", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Opady 24h", f"{rainfall_24h} mm", f'Czas pomiaru: od {start_date.strftime("%d.%m, %H:%M")}'),
+        get_card_content("Wiatr prędkość śr.", f"{current_wind_speed_avg} km/h", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Wiatr prędkość max.", f"{current_wind_speed_max} km/h", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content("Wiatr kierunek", f"{current_wind_direction}", f'Czas pomiaru: {last_measurement_time}'),
     ]
