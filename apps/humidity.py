@@ -7,7 +7,8 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 from utilities.utilities import generate_slider_marks, apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features, read_configuration, get_card_content
+    apply_common_chart_features, read_configuration, get_intervals, get_navigation, get_slider, \
+    get_current_measurement_card
 import dash_bootstrap_components as dbc
 from app import app
 
@@ -17,56 +18,27 @@ BACKGROUND_COLOR = "#5D5C61"
 
 
 layout = html.Div(
-    id="root-div",
+    id="div-root",
     children=[
         html.Div(
-            id="div-timer",
-            children=html.Label(id='label-timer-humidity')
+            id="div-timer-humidity"
         ),
-        html.Div(
-            id="div-navigation",
-            children=[
-                dcc.Link(id='home', children='Start', href='/'),
-                dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
-                dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
-                dcc.Link(id='home', className="active", children='Wilgotność', href='/apps/humidity'),
-                dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-                dcc.Link(id='home', children='Wiatr', href='/apps/wind')
-            ]
-        ),
+        get_navigation(active='Wilgotność'),
         html.Div(
             className="cards-container",
             children=dbc.Card(color="#00ccff", id='current-humidityy')
         ),
-        html.Div(
-            id="div-slider-humidity",
-            children=[
-                html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
-                dcc.Slider(
-                    id="slider-humidity",
-                    min=1,
-                    value=7,
-                )
-            ]
-        ),
+        get_slider(id_postfix='humidity'),
         html.Div(
             id="div-line-chart-humidity",
             children=dcc.Loading(children=dcc.Graph(id="line-chart-humidity"))
         ),
         html.Div(
             id="div-warning-humidity",
-            children=html.Label(id="label-warning", children="Oczekiwanie na pierwszy pomiar...")
+            children="Oczekiwanie na pierwszy pomiar..."
         ),
-        dcc.Interval(
-            id='interval-timer',
-            interval=1 * 1000,
-            n_intervals=0
-        ),
-        dcc.Interval(
-            id='interval-measurement',
-            interval=5 * 60 * 1000,
-            n_intervals=0
-        )
+        get_intervals()[0],
+        get_intervals()[1]
 ])
 
 
@@ -110,9 +82,7 @@ def update_warning(n):
     Input(component_id='interval-timer', component_property='n_intervals')
 )
 def update_current_humidity(n):
-    current_humidity = pd.read_json(DATA_SOURCE).iloc[-1]['humidity']
-    last_measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
-    return get_card_content("Aktualnie", f"{current_humidity} %", f'Czas pomiaru: {last_measurement_time}')
+    return get_current_measurement_card('humidity')
 
 
 @app.callback(
@@ -135,8 +105,11 @@ def update_slider(n):
 
 
 @app.callback(
-    Output('label-timer-humidity', 'children'),
+    Output('div-timer-humidity', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(
+        datetime.now(pytz.timezone('Europe/Warsaw')),
+        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
+    )

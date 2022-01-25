@@ -1,100 +1,104 @@
 import pytz
-from dash import dcc
 from dash import html
 from datetime import datetime
 from dash.dependencies import Input, Output
 from babel.dates import format_datetime
 import dash_bootstrap_components as dbc
-from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 from app import app
-from utilities.utilities import get_card_content, read_configuration, degrees_to_compass
+from utilities.utilities import get_card_content, read_configuration, degrees_to_compass, get_intervals, get_navigation, \
+    get_rainfall_sum_24h_and_start_date
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
+MEASUREMENT_INTERVAL = CONFIG['MEASUREMENT']['interval']
 
 layout = html.Div(
-    id="root-div-welcome",
+    id="div-root-home",
     children=[
         html.Div(
-            id="div-timer",
-            children=html.Label(id='label-timer-home')
+            id="div-timer-home"
         ),
-        html.Div(
-            id="div-navigation",
-            children=[
-                dcc.Link(id='home', className="active", children='Start', href='/'),
-                dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
-                dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
-                dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
-                dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-                dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
-            ]
-        ),
+        get_navigation(active='Start'),
         html.Div(
             className="cards-container",
             children=[
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(
-                            color="#5585b5",
-                            inverse=True,
-                            id='current-rainfall-home')),
-                        dbc.Col(dbc.Card(
-                            color="#f95959", inverse=True,
-                            id='current-temperature-home')),
-                        dbc.Col(dbc.Card(
-                            color="#00ccff", inverse=True,
-                            id='current-humidity-home')),
+                        dbc.Col(
+                            dbc.Card(
+                                color="#5585b5",
+                                id='current-rainfall-home'
+                            )
+                        ),
+                        dbc.Col(
+                            dbc.Card(
+                                color="#f95959",
+                                id='current-temperature-home'
+                            )
+                        ),
+                        dbc.Col(
+                            dbc.Card(
+                                color="#00ccff",
+                                id='current-humidity-home'
+                            )
+                        ),
                     ],
                     className="mb-4",
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(
-                            color="#f1b963",
-                            inverse=True,
-                            id='current-wind-avg-home')),
-                        dbc.Col(dbc.Card(
-                            color="#f1b963", inverse=True,
-                            id='current-wind-max-home')),
-                        dbc.Col(dbc.Card(
-                            color="#f1b963",
-                            inverse=True,
-                            id='current-wind-direction-home')),
+                        dbc.Col(
+                            dbc.Card(
+                                color="#f1b963",
+                                id='current-wind-avg-home'
+                            )
+                        ),
+                        dbc.Col(
+                            dbc.Card(
+                                color="#f1b963",
+                                id='current-wind-max-home'
+                            )
+                        ),
+                        dbc.Col(
+                            dbc.Card(
+                                color="#f1b963",
+                                id='current-wind-direction-home'
+                            )
+                        ),
                     ],
                     className="mb-4",
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(
-                            color="#ff8c69",
-                            inverse=True,
-                            id='current-pressure-home')),
-                    ]
+                        dbc.Col(
+                            dbc.Card(
+                                color="#ff8c69",
+                                id='current-pressure-home'
+                            )
+                        ),
+                    ],
+                    className="mb-4",
                 ),
             ]
         ),
-        dcc.Interval(
-            id='interval-timer',
-            interval=1 * 1000,
-            n_intervals=0
-        ),
-        dcc.Interval(
-            id='interval-measurement',
-            interval=5 * 60 * 1000,
-            n_intervals=0
-        )
-])
+        get_intervals()[0],
+        get_intervals()[1]
+    ]
+)
 
 
 @app.callback(
-    Output('label-timer-home', 'children'),
+    Output('div-timer-home', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(
+        datetime.now(pytz.timezone('Europe/Warsaw')),
+        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
+    )
+
 
 @app.callback(
     Output(component_id='current-temperature-home', component_property='children'),
@@ -108,22 +112,44 @@ def update_timer(n):
 )
 def update_current_measurements(n):
     df = pd.read_json(DATA_SOURCE)
-    last_measurement_time =  df.iloc[-1]['date'].strftime("%d.%m, %H:%M")
+    last_measurement_time = df.iloc[-1]['date'].strftime("%d.%m, %H:%M")
     current_temperature = df.iloc[-1]['temperature']
     current_humidity = df.iloc[-1]['humidity']
     current_pressure = df.iloc[-1]['pressure']
     current_wind_speed_avg = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_avg']
     current_wind_speed_max = pd.read_json(DATA_SOURCE).iloc[-1]['wind_speed_max']
     current_wind_direction = degrees_to_compass(pd.read_json(DATA_SOURCE).iloc[-1]['wind_direction'])
-    start_date = datetime.now() - relativedelta(days=1)
-    df = df.loc[df['date'] > start_date]
-    rainfall_24h = df['rainfall'].sum()
+    rainfall_24h, start_date = get_rainfall_sum_24h_and_start_date()
     return [
-        get_card_content("Temperatura", f"{current_temperature} °C", f'Czas pomiaru: {last_measurement_time}'),
-        get_card_content("Wilgotność", f"{current_humidity} %", f'Czas pomiaru: {last_measurement_time}'),
-        get_card_content("Ciśnienie", f"{current_pressure} hPa", f'Czas pomiaru: {last_measurement_time}'),
-        get_card_content("Opady 24h", f"{rainfall_24h} mm", f'Czas pomiaru: od {start_date.strftime("%d.%m, %H:%M")}'),
-        get_card_content("Wiatr prędkość śr.", f"{current_wind_speed_avg} km/h", f'Czas pomiaru: {last_measurement_time}'),
-        get_card_content("Wiatr prędkość max.", f"{current_wind_speed_max} km/h", f'Czas pomiaru: {last_measurement_time}'),
-        get_card_content("Wiatr kierunek", f"{current_wind_direction}", f'Czas pomiaru: {last_measurement_time}'),
+        get_card_content(
+            "Temperatura", f"{current_temperature} °C",
+            f'Czas pomiaru: {last_measurement_time}'
+        ),
+        get_card_content(
+            "Wilgotność", f"{current_humidity} %",
+            f'Czas pomiaru: {last_measurement_time}'
+        ),
+        get_card_content(
+            "Ciśnienie", f"{current_pressure} hPa",
+            f'Czas pomiaru: {last_measurement_time}'
+        ),
+        get_card_content(
+            "Opady 24h", f"{rainfall_24h} mm",
+            f'Czas pomiaru: od {start_date.strftime("%d.%m, %H:%M")}'
+        ),
+        get_card_content(
+            "Wiatr prędkość śr.",
+            f"{current_wind_speed_avg} km/h",
+            f'Czas pomiaru: {last_measurement_time}'
+        ),
+        get_card_content(
+            "Wiatr prędkość max.",
+            f"{current_wind_speed_max} km/h",
+            f'Czas pomiaru: {last_measurement_time}'
+        ),
+        get_card_content(
+            "Wiatr kierunek",
+            f"{current_wind_direction}",
+            f'Czas pomiaru: {last_measurement_time}'
+        ),
     ]

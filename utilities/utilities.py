@@ -3,7 +3,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import dash_bootstrap_components as dbc
-from dash import html
+from dash import html, dcc
+
 
 def read_configuration():
     config = configparser.ConfigParser()
@@ -12,6 +13,7 @@ def read_configuration():
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
+MEASUREMENT_INTERVAL = CONFIG['MEASUREMENT']['interval']
 
 def generate_slider_marks(days_count, tick_postfix):
     style = {'font-size': 20, 'color': 'white'}
@@ -68,6 +70,13 @@ def get_total_rainfall_sum(day_count):
     rainfall_sum = round(df['rainfall'].sum(), 2)
     return rainfall_sum
 
+
+def get_rainfall_sum_24h_and_start_date():
+    df = pd.read_json(DATA_SOURCE)
+    start_date = datetime.now() - relativedelta(days=1)
+    df = df.loc[df['date'] > start_date]
+    rainfall_sum = round(df['rainfall'].sum(), 2)
+    return rainfall_sum, start_date
 
 def degrees_to_compass(degrees):
     val = int((degrees / 22.5) + .5)
@@ -144,3 +153,75 @@ def get_card_content(card_header, card_paragraph, card_footer):
 
     ]
     return card_content
+
+
+def get_intervals():
+    return [
+        dcc.Interval(
+            id='interval-timer',
+            interval=1 * 1000,
+            n_intervals=0
+        ),
+        dcc.Interval(
+            id='interval-measurement',
+            interval=int(MEASUREMENT_INTERVAL),
+            n_intervals=0
+        )
+    ]
+
+
+def get_navigation(active):
+    children = [
+            dcc.Link(id='home', children='Start', href='/'),
+            dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
+            dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
+            dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
+            dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
+            dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
+    ]
+
+    for c in children:
+        if c.__getattribute__('children') == active:
+            c.__setattr__('className', 'active')
+
+    return html.Div(
+        id="div-navigation",
+        children=children
+    )
+
+
+def get_slider(id_postfix):
+    return \
+        html.Div(
+            id=f'div-slider-{id_postfix}',
+            children=[
+                'Wybierz okres czasu',
+                dcc.Slider(
+                    id=f'slider-{id_postfix}',
+                    min=1,
+                    value=7,
+                )
+            ]
+        )
+
+
+def get_current_measurement_card(measurement_name):
+    measurement_value = pd.read_json(DATA_SOURCE).iloc[-1][measurement_name]
+    measurement_unit = None
+    if measurement_name == 'pressure':
+        measurement_unit = 'hPa'
+    elif measurement_name == 'temperature':
+        measurement_unit = '°C'
+    elif measurement_name == 'humidity':
+        measurement_unit = '%'
+    elif measurement_name == 'rainfall':
+        measurement_unit = 'mm'
+    elif measurement_name == 'wind':
+        measurement_unit = 'km/h'
+    measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
+
+    return get_card_content(
+        card_header="Aktualnie",
+        card_paragraph=f"{measurement_value} {measurement_unit}",
+        card_footer=f'Czas pomiaru: {measurement_time}'
+    )

@@ -6,10 +6,10 @@ from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from dateutil.relativedelta import relativedelta
 
 from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, apply_common_chart_features, \
-    get_total_rainfall_sum, read_configuration, get_card_content
+    get_total_rainfall_sum, read_configuration, get_card_content, get_intervals, get_navigation, get_slider, \
+    get_rainfall_sum_24h_and_start_date
 import dash_bootstrap_components as dbc
 from app import app
 
@@ -19,57 +19,27 @@ BACKGROUND_COLOR = "#5D5C61"
 
 
 layout = html.Div(
-    id="root-div",
+    id="div-root",
     children=[
         html.Div(
-            id="div-timer",
-            children=html.Label(id='label-timer-rainfall')
+            id="div-timer-rainfall"
         ),
-        html.Div(
-            id="div-navigation",
-            children=[
-                dcc.Link(id='home', children='Start', href='/'),
-                dcc.Link(id='home', className="active", children='Opady', href='/apps/rainfall'),
-                dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
-                dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
-                dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-                dcc.Link(id='home', children='Wiatr', href='/apps/wind')
-            ]
-        ),
+        get_navigation(active='Opady'),
         html.Div(
             className="cards-container",
             children=dbc.Card(color="#557A95", id='current-rainfall-24h')
         ),
-        html.Div(
-            id="div-slider-rainfall",
-            children=[
-                html.Label(id="label-select-range-title", children='Wybierz okres czasu'),
-                dcc.Slider(
-                    id="slider-rainfall",
-                    min=1,
-                    value=7
-                ),
-                html.Div(id='slider-rainfall-output')
-            ]
-        ),
+        get_slider(id_postfix='rainfall'),
         html.Div(
             id="div-bar-chart-rainfall",
             children=dcc.Loading(children=dcc.Graph(id="bar-chart-rainfall"))
         ),
         html.Div(
             id="div-warning-rainfall",
-            children=html.Label(id="label-warning-rainfall", children="Oczekiwanie na pierwszy pomiar...")
+            children="Oczekiwanie na pierwszy pomiar..."
         ),
-        dcc.Interval(
-            id='interval-timer',
-            interval=1 * 1000,
-            n_intervals=0
-        ),
-        dcc.Interval(
-            id='interval-measurement',
-            interval=5 * 60 * 1000,
-            n_intervals=0
-        )
+        get_intervals()[0],
+        get_intervals()[1]
 ])
 
 
@@ -109,10 +79,7 @@ def update_warning(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_rainfall_24h(n):
-    df = pd.read_json(DATA_SOURCE)
-    start_date = datetime.now() - relativedelta(days=1)
-    df = df.loc[df['date'] > start_date]
-    rainfall_24h = df['rainfall'].sum()
+    rainfall_24h, start_date = get_rainfall_sum_24h_and_start_date()
     return get_card_content("Ostatnie 24h", f"{rainfall_24h} mm", f'Czas pomiaru: od {start_date.strftime("%d.%m, %H:%M")}')
 
 
@@ -135,11 +102,14 @@ def update_slider(n):
 
 
 @app.callback(
-    Output('label-timer-rainfall', 'children'),
+    Output('div-timer-rainfall', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(datetime.now(pytz.timezone('Europe/Warsaw')), format="EEEE, d MMMM yyyy, HH:mm:ss", locale='pl')
+    return format_datetime(
+        datetime.now(pytz.timezone('Europe/Warsaw')),
+        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
+    )
 
 @app.callback(
     Output('slider-rainfall-output', 'children'),
