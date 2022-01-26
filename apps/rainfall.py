@@ -1,16 +1,13 @@
-from datetime import datetime
 import pandas as pd
 import plotly.express as px
-import pytz
-from babel.dates import format_datetime
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-from utilities.utilities import generate_slider_marks, get_rainfall_sum_per_day, apply_common_chart_features, \
-    get_total_rainfall_sum, read_configuration, get_card_content, get_intervals, get_navigation, get_slider, \
-    get_rainfall_sum_24h_and_start_date
-import dash_bootstrap_components as dbc
+from utilities.utilities import get_rainfall_sum_per_day, apply_common_chart_features, \
+    get_total_rainfall_sum, read_configuration, get_navigation, get_slider, \
+    get_slider_max_and_marks, get_slider_container_display, get_current_measurement_card, get_interval_timer, \
+    get_interval_measurement, get_div_warning, get_div_timer, get_div_current_measurement, get_current_date
 from app import app
 
 CONFIG = read_configuration()
@@ -21,25 +18,17 @@ BACKGROUND_COLOR = "#5D5C61"
 layout = html.Div(
     id="div-root",
     children=[
-        html.Div(
-            id="div-timer-rainfall"
-        ),
+        get_div_timer(id_postfix='rainfall'),
         get_navigation(active='Opady'),
-        html.Div(
-            className="cards-container",
-            children=dbc.Card(color="#557A95", id='current-rainfall-24h')
-        ),
+        get_div_current_measurement(id_postfix='rainfall', card_color='#557A95'),
         get_slider(id_postfix='rainfall'),
         html.Div(
             id="div-bar-chart-rainfall",
             children=dcc.Loading(children=dcc.Graph(id="bar-chart-rainfall"))
         ),
-        html.Div(
-            id="div-warning-rainfall",
-            children="Oczekiwanie na pierwszy pomiar..."
-        ),
-        get_intervals()[0],
-        get_intervals()[1]
+        get_div_warning(id_postfix='rainfall'),
+        get_interval_timer(),
+        get_interval_measurement()
 ])
 
 
@@ -75,12 +64,11 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='current-rainfall-24h', component_property='children'),
+    Output(component_id='current-rainfall', component_property='children'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_rainfall_24h(n):
-    rainfall_24h, start_date = get_rainfall_sum_24h_and_start_date()
-    return get_card_content("Ostatnie 24h", f"{rainfall_24h} mm", f'Czas pomiaru: od {start_date.strftime("%d.%m, %H:%M")}')
+    return get_current_measurement_card(card_header="Ostatnie 24h", measurement_name='rainfall')
 
 
 @app.callback(
@@ -90,15 +78,9 @@ def update_rainfall_24h(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_slider(n):
-    df = pd.read_json(DATA_SOURCE)
-
-    if df.empty:
-        return None, {}, {'display': 'none'}
-    else:
-        day_count = df.groupby([df["date"].dt.year, df["date"].dt.month, df["date"].dt.day], as_index=False).ngroups
-        if day_count > 28:
-            day_count = 28
-        return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
+    slider_max, slider_marks = get_slider_max_and_marks()
+    slider_container_display = get_slider_container_display()
+    return slider_max, slider_marks, slider_container_display
 
 
 @app.callback(
@@ -106,10 +88,7 @@ def update_slider(n):
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(
-        datetime.now(pytz.timezone('Europe/Warsaw')),
-        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
-    )
+    return get_current_date()
 
 @app.callback(
     Output('slider-rainfall-output', 'children'),

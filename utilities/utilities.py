@@ -1,5 +1,8 @@
 import configparser
 from datetime import datetime
+
+import pytz
+from babel.dates import format_datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import dash_bootstrap_components as dbc
@@ -11,9 +14,11 @@ def read_configuration():
     config.read('config.ini')
     return config
 
+
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
 MEASUREMENT_INTERVAL = CONFIG['MEASUREMENT']['interval']
+
 
 def generate_slider_marks(days_count, tick_postfix):
     style = {'font-size': 20, 'color': 'white'}
@@ -45,7 +50,7 @@ def generate_slider_marks(days_count, tick_postfix):
 
 def get_rainfall_sum_per_day(day_count):
     df = pd.read_json(DATA_SOURCE)
-    start_date = (datetime.now() - relativedelta(days=day_count-1))\
+    start_date = (datetime.now() - relativedelta(days=day_count - 1)) \
         .replace(hour=0,
                  minute=0,
                  second=0,
@@ -61,7 +66,7 @@ def get_rainfall_sum_per_day(day_count):
 
 def get_total_rainfall_sum(day_count):
     df = pd.read_json(DATA_SOURCE)
-    start_date = (datetime.now() - relativedelta(days=day_count-1))\
+    start_date = (datetime.now() - relativedelta(days=day_count - 1)) \
         .replace(hour=0,
                  minute=0,
                  second=0,
@@ -71,12 +76,13 @@ def get_total_rainfall_sum(day_count):
     return rainfall_sum
 
 
-def get_rainfall_sum_24h_and_start_date():
+def get_rainfall_sum_24h():
     df = pd.read_json(DATA_SOURCE)
     start_date = datetime.now() - relativedelta(days=1)
     df = df.loc[df['date'] > start_date]
     rainfall_sum = round(df['rainfall'].sum(), 2)
-    return rainfall_sum, start_date
+    return rainfall_sum
+
 
 def degrees_to_compass(degrees):
     val = int((degrees / 22.5) + .5)
@@ -86,7 +92,7 @@ def degrees_to_compass(degrees):
 
 def get_measurements(day_count):
     df = pd.read_json(DATA_SOURCE)
-    start_date = (datetime.now() - relativedelta(days=day_count-1))\
+    start_date = (datetime.now() - relativedelta(days=day_count - 1)) \
         .replace(hour=0,
                  minute=0,
                  second=0,
@@ -102,8 +108,8 @@ def apply_common_chart_features(fig):
     fig.update_layout(
         xaxis=dict(
             tickfont=dict(size=12),
-        automargin=True,
-        tickangle=45))
+            automargin=True,
+            tickangle=45))
     fig.update_layout(
         yaxis=dict(
             tickfont=dict(size=12)))
@@ -128,12 +134,14 @@ def apply_common_chart_features(fig):
             'yanchor': 'auto'})
     fig.update_layout(height=600)
 
-    return  fig
+    return fig
+
 
 def apply_common_line_chart_features(fig):
     fig.update_traces(marker={'size': 8})
     fig.update_traces(mode='lines+markers')
     return fig
+
 
 def get_card_content(card_header, card_paragraph, card_footer):
     card_content = [
@@ -155,29 +163,30 @@ def get_card_content(card_header, card_paragraph, card_footer):
     return card_content
 
 
-def get_intervals():
-    return [
-        dcc.Interval(
-            id='interval-timer',
-            interval=1 * 1000,
-            n_intervals=0
-        ),
-        dcc.Interval(
-            id='interval-measurement',
-            interval=int(MEASUREMENT_INTERVAL),
-            n_intervals=0
-        )
-    ]
+def get_interval_timer():
+    return dcc.Interval(
+        id='interval-timer',
+        interval=1 * 1000,
+        n_intervals=0
+    )
+
+
+def get_interval_measurement():
+    return dcc.Interval(
+        id='interval-measurement',
+        interval=int(MEASUREMENT_INTERVAL),
+        n_intervals=0
+    )
 
 
 def get_navigation(active):
     children = [
-            dcc.Link(id='home', children='Start', href='/'),
-            dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
-            dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
-            dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
-            dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-            dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
+        dcc.Link(id='home', children='Start', href='/'),
+        dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
+        dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
+        dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
+        dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
+        dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
     ]
 
     for c in children:
@@ -205,8 +214,12 @@ def get_slider(id_postfix):
         )
 
 
-def get_current_measurement_card(measurement_name):
-    measurement_value = pd.read_json(DATA_SOURCE).iloc[-1][measurement_name]
+def get_current_measurement_card(measurement_name, card_header='Aktualnie'):
+    if measurement_name != 'rainfall':
+        measurement_value = pd.read_json(DATA_SOURCE).iloc[-1][measurement_name]
+    else:
+        measurement_value = get_rainfall_sum_24h()
+
     measurement_unit = None
     if measurement_name == 'pressure':
         measurement_unit = 'hPa'
@@ -216,12 +229,70 @@ def get_current_measurement_card(measurement_name):
         measurement_unit = '%'
     elif measurement_name == 'rainfall':
         measurement_unit = 'mm'
-    elif measurement_name == 'wind':
+    elif 'wind' in measurement_name:
         measurement_unit = 'km/h'
-    measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
+
+    if measurement_name != 'rainfall':
+        measurement_time = pd.read_json(DATA_SOURCE).iloc[-1]['date'].strftime("%d.%m, %H:%M")
+    else:
+        measurement_time = 'ostatnie 24h'
 
     return get_card_content(
-        card_header="Aktualnie",
+        card_header=card_header,
         card_paragraph=f"{measurement_value} {measurement_unit}",
         card_footer=f'Czas pomiaru: {measurement_time}'
+    )
+
+
+def get_slider_max_and_marks():
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
+        return None, {}
+    else:
+        slider_max = df.groupby([df["date"].dt.year, df["date"].dt.month, df["date"].dt.day], as_index=False).ngroups
+        if slider_max > 28:
+            slider_max = 28
+        return slider_max, generate_slider_marks(slider_max, tick_postfix='d')
+
+
+def get_slider_container_display():
+    df = pd.read_json(DATA_SOURCE)
+
+    if df.empty:
+        return {'display': 'none'}
+    else:
+        return {'display': 'block'}
+
+
+def get_div_warning(id_postfix):
+    return html.Div(
+        id=f"div-warning-{id_postfix}",
+        children="Oczekiwanie na pierwszy pomiar..."
+    )
+
+
+def get_div_timer(id_postfix):
+    return html.Div(
+        id=f"div-timer-{id_postfix}"
+    )
+
+
+def get_line_chart(id_postfix):
+    return html.Div(
+        id=f"div-line-chart-{id_postfix}",
+    )
+
+
+def get_div_current_measurement(id_postfix, card_color):
+    return html.Div(
+        className="cards-container",
+        children=dbc.Card(color=card_color, id=f'current-{id_postfix}')
+    )
+
+
+def get_current_date():
+    return format_datetime(
+        datetime.now(pytz.timezone('Europe/Warsaw')),
+        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
     )

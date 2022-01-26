@@ -1,15 +1,12 @@
-from datetime import datetime
 import pandas as pd
 import plotly.express as px
-import pytz
-from babel.dates import format_datetime
-from dash import dcc
-from dash import html
+from dash import html, dcc
 from dash.dependencies import Input, Output
-from utilities.utilities import generate_slider_marks, apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features, read_configuration, get_intervals, get_navigation, get_slider, \
-    get_current_measurement_card
-import dash_bootstrap_components as dbc
+from utilities.utilities import apply_common_line_chart_features, get_measurements, \
+    apply_common_chart_features, read_configuration, get_navigation, get_slider, \
+    get_current_measurement_card, get_slider_max_and_marks, get_slider_container_display, get_interval_timer, \
+    get_interval_measurement, get_div_warning, get_div_timer, get_line_chart, get_div_current_measurement, \
+    get_current_date
 from app import app
 
 CONFIG = read_configuration()
@@ -20,31 +17,20 @@ BACKGROUND_COLOR = "#5D5C61"
 layout = html.Div(
     id="div-root",
     children=[
-        html.Div(
-            id="div-timer-humidity"
-        ),
+        get_div_timer(id_postfix='humidity'),
         get_navigation(active='Wilgotność'),
-        html.Div(
-            className="cards-container",
-            children=dbc.Card(color="#00ccff", id='current-humidityy')
-        ),
+        get_div_current_measurement(id_postfix='humidity', card_color='#00ccff'),
         get_slider(id_postfix='humidity'),
-        html.Div(
-            id="div-line-chart-humidity",
-            children=dcc.Loading(children=dcc.Graph(id="line-chart-humidity"))
-        ),
-        html.Div(
-            id="div-warning-humidity",
-            children="Oczekiwanie na pierwszy pomiar..."
-        ),
-        get_intervals()[0],
-        get_intervals()[1]
+        get_line_chart(id_postfix='humidity'),
+        get_div_warning(id_postfix='humidity'),
+        get_interval_timer(),
+        get_interval_measurement()
 ])
 
 
 @app.callback(
-    Output(component_id='line-chart-humidity', component_property='figure'),
-    Output(component_id='line-chart-humidity', component_property='style'),
+    Output(component_id='div-line-chart-humidity', component_property='children'),
+    Output(component_id='div-line-chart-humidity', component_property='style'),
     Input(component_id='slider-humidity', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
@@ -63,7 +49,7 @@ def update_line_chart(day_count, n):
         fig.update_traces(line_color='#00ccff')
         fig.update_traces(hovertemplate="Data: %{x}<br>Wilgotność: %{y} %")
 
-        return fig, {'display': 'block'}
+        return dcc.Loading(children=dcc.Graph(figure=fig)), {'display': 'block'}
 
 
 @app.callback(
@@ -78,7 +64,7 @@ def update_warning(n):
         return {'display': 'block'}
 
 @app.callback(
-    Output(component_id='current-humidityy', component_property='children'),
+    Output(component_id='current-humidity', component_property='children'),
     Input(component_id='interval-timer', component_property='n_intervals')
 )
 def update_current_humidity(n):
@@ -92,16 +78,9 @@ def update_current_humidity(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_slider(n):
-
-    df = pd.read_json(DATA_SOURCE)
-
-    if df.empty:
-        return None, {}, {'display': 'none'}
-    else:
-        day_count = df.groupby([df["date"].dt.year, df["date"].dt.month, df["date"].dt.day], as_index=False).ngroups
-        if day_count > 28:
-            day_count = 28
-        return day_count, generate_slider_marks(day_count, tick_postfix='d'), {'display': 'block'}
+    slider_max, slider_marks = get_slider_max_and_marks()
+    slider_container_display = get_slider_container_display()
+    return slider_max, slider_marks, slider_container_display
 
 
 @app.callback(
@@ -109,7 +88,4 @@ def update_slider(n):
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):
-    return format_datetime(
-        datetime.now(pytz.timezone('Europe/Warsaw')),
-        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
-    )
+    return get_current_date()
