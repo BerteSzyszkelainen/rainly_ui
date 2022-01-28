@@ -2,42 +2,48 @@ import pandas as pd
 from dash import html, dcc
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
-from utilities.utilities import degrees_to_compass, \
-    get_measurements, apply_common_chart_features, read_configuration, get_navigation, \
-    get_slider, get_slider_max_and_marks, get_slider_container_display, get_current_measurement_card, \
-    get_interval_timer, get_interval_measurement, get_div_warning, get_div_timer, get_line_chart, get_current_date
+from utilities.utilities import degrees_to_compass, get_card
+from utilities.utilities import get_measurements
+from utilities.utilities import apply_common_chart_features
+from utilities.utilities import read_configuration
+from utilities.utilities import get_navigation
+from utilities.utilities import get_slider
+from utilities.utilities import get_current_measurement_card
+from utilities.utilities import get_slider_max_and_marks
+from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_interval_timer
+from utilities.utilities import get_warning
+from utilities.utilities import get_interval_measurement
+from utilities.utilities import get_timer
+from utilities.utilities import get_line_chart
+from utilities.utilities import get_current_date
 import dash_bootstrap_components as dbc
 from app import app
 
+
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
-BACKGROUND_COLOR = "#5D5C61"
+
 
 layout = html.Div(
     id="div-root",
     children=[
-        get_div_timer(id_postfix='wind'),
+        get_timer(id_postfix='wind'),
         get_navigation(active='Wiatr'),
         html.Div(
             className="cards-container",
             children=dbc.Row(
                 children=[
-                    dbc.Col(dbc.Card(
-                        color="#f1b963",
-                        id='current-wind-avg')),
-                    dbc.Col(dbc.Card(
-                        color="#f1b963",
-                        id='current-wind-max')),
-                    dbc.Col(dbc.Card(
-                        color="#f1b963",
-                        id='current-wind-direction')),
+                    dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#f1b963'))),
+                    dbc.Col(dbc.Card(get_card(id='current-wind-max', color='#f1b963'))),
+                    dbc.Col(dbc.Card(get_card(id='current-wind-direction', color='#f1b963'))),
                 ],
                 className="mb-4",
             )
         ),
         get_slider(id_postfix='wind'),
         get_line_chart(id_postfix='wind'),
-        get_div_warning(id_postfix='wind'),
+        get_warning(id_postfix='wind'),
         get_interval_timer(),
         get_interval_measurement()
     ]
@@ -57,10 +63,11 @@ def update_line_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = go.Figure()
+        date_format = '%d.%m %H:%M'
 
         fig.add_trace(
             go.Scatter(
-                x=df["date"].dt.strftime('%d.%m %H:%M'),
+                x=df["date"].dt.strftime(date_format),
                 y=df["wind_speed_avg"],
                 name="prędkość śr.",
                 mode='lines+markers',
@@ -70,7 +77,7 @@ def update_line_chart(day_count, n):
 
         fig.add_trace(
             go.Scatter(
-                x=df["date"].dt.strftime('%d.%m %H:%M'),
+                x=df["date"].dt.strftime(date_format),
                 y=df["wind_speed_max"],
                 name="prędkość maks.",
                 mode='lines+markers',
@@ -80,7 +87,7 @@ def update_line_chart(day_count, n):
 
         fig.add_trace(
             go.Scatter(
-                x=df["date"].dt.strftime('%d.%m %H:%M'),
+                x=df["date"].dt.strftime(date_format),
                 y=df["wind_speed_max"] + 20,
                 name="kierunek",
                 mode="markers+text",
@@ -123,8 +130,8 @@ def update_warning(n):
 def update_current_wind(n):
     return [
         get_current_measurement_card(measurement_name='wind_speed_avg', card_header="Prędkość śr."),
-        get_current_measurement_card(measurement_name='wind_speed_avg', card_header="Prędkość śr."),
-        get_current_measurement_card(measurement_name='wind_speed_avg', card_header="Prędkość śr.")
+        get_current_measurement_card(measurement_name='wind_speed_max', card_header="Prędkość max."),
+        get_current_measurement_card(measurement_name='wind_direction', card_header="Kierunek")
     ]
 
 

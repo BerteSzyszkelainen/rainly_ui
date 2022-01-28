@@ -2,31 +2,42 @@ import pandas as pd
 import plotly.express as px
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from utilities.utilities import apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features, read_configuration, get_navigation, get_slider, \
-    get_current_measurement_card, get_slider_max_and_marks, get_slider_container_display, get_interval_timer, \
-    get_interval_measurement, get_div_warning, get_div_timer, get_line_chart, get_div_current_measurement, \
-    get_current_date
+from utilities.utilities import apply_common_line_chart_features
+from utilities.utilities import get_measurements
+from utilities.utilities import apply_common_chart_features
+from utilities.utilities import read_configuration
+from utilities.utilities import get_navigation
+from utilities.utilities import get_slider
+from utilities.utilities import get_current_measurement_card
+from utilities.utilities import get_slider_max_and_marks
+from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_interval_timer
+from utilities.utilities import get_warning
+from utilities.utilities import get_interval_measurement
+from utilities.utilities import get_timer
+from utilities.utilities import get_line_chart
+from utilities.utilities import get_div_current_measurement
+from utilities.utilities import get_current_date
 from app import app
 
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
-BACKGROUND_COLOR = "#5D5C61"
 
 
 layout = html.Div(
     id="div-root",
     children=[
-        get_div_timer(id_postfix='pressure'),
+        get_timer(id_postfix='pressure'),
         get_navigation(active='Ciśnienie'),
         get_div_current_measurement(id_postfix='pressure', card_color='#ff8c69'),
         get_slider(id_postfix='pressure'),
         get_line_chart(id_postfix='pressure'),
-        get_div_warning(id_postfix='pressure'),
+        get_warning(id_postfix='pressure'),
         get_interval_timer(),
         get_interval_measurement()
-])
+    ]
+)
 
 
 @app.callback(
@@ -36,7 +47,6 @@ layout = html.Div(
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_line_chart(day_count, n):
-
     df = get_measurements(day_count=day_count)
 
     if df.empty:
@@ -58,11 +68,11 @@ def update_line_chart(day_count, n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
-
     df = pd.read_json(DATA_SOURCE)
 
     if df.empty:
         return {'display': 'block'}
+
 
 @app.callback(
     Output(component_id='current-pressure', component_property='children'),
@@ -70,6 +80,7 @@ def update_warning(n):
 )
 def update_current_pressure(n):
     return get_current_measurement_card('pressure')
+
 
 @app.callback(
     Output(component_id='slider-pressure', component_property='max'),

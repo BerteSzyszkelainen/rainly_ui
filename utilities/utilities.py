@@ -1,6 +1,5 @@
 import configparser
 from datetime import datetime
-
 import pytz
 from babel.dates import format_datetime
 from dateutil.relativedelta import relativedelta
@@ -22,28 +21,22 @@ MEASUREMENT_INTERVAL = CONFIG['MEASUREMENT']['interval']
 
 def generate_slider_marks(days_count, tick_postfix):
     style = {'font-size': 20, 'color': 'white'}
+
     if days_count < 3:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
-                 range(1, days_count)}
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in range(1, days_count)}
     elif days_count < 7:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
-                 [1, 2, 3]}
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in [1, 2, 3]}
     elif days_count < 14:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
-                 [1, 2, 3, 7]}
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in [1, 2, 3, 7]}
     elif days_count < 21:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
-                 [1, 2, 3, 7, 14]}
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in [1, 2, 3, 7, 14]}
     elif days_count < 28:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
-                 [1, 2, 3, 7, 14, 21]}
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in [1, 2, 3, 7, 14, 21]}
     else:
-        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in
-                 [1, 2, 3, 7, 14, 21, 28]}
+        marks = {i: {'label': '{}{}'.format(i, tick_postfix), 'style': style} for i in [1, 2, 3, 7, 14, 21, 28]}
 
     if days_count < 28:
-        marks.update({days_count: {'label': '{}{}'.format(days_count, tick_postfix),
-                                   'style': {'font-size': 25, 'color': 'white'}}})
+        marks.update({days_count: {'label': '{}{}'.format(days_count, tick_postfix), 'style': style}})
 
     return marks
 
@@ -105,33 +98,16 @@ def get_measurements(day_count):
 def apply_common_chart_features(fig):
     BACKGROUND_COLOR = "#5D5C61"
     fig.update_layout(xaxis_title='Dzień')
-    fig.update_layout(
-        xaxis=dict(
-            tickfont=dict(size=12),
-            automargin=True,
-            tickangle=45))
-    fig.update_layout(
-        yaxis=dict(
-            tickfont=dict(size=12)))
+    fig.update_layout(xaxis=dict(tickfont=dict(size=12), automargin=True, tickangle=45))
+    fig.update_layout(yaxis=dict(tickfont=dict(size=12)))
     fig.update_layout(xaxis_dtick="n")
     fig.update_layout(showlegend=False)
     fig.update_layout(transition_duration=500)
     fig.update_layout(plot_bgcolor=BACKGROUND_COLOR)
     fig.update_layout(paper_bgcolor=BACKGROUND_COLOR)
-    fig.update_layout(font={"color": "white", "size": 18})
-    fig.update_layout(
-        hoverlabel=dict(
-            bgcolor='darkseagreen',
-            font_size=20,
-            font_family="Lucida Console"
-        )
-    )
-    fig.update_layout(
-        title={
-            'y': 1.0,
-            'x': 0.0,
-            'xanchor': 'left',
-            'yanchor': 'auto'})
+    fig.update_layout(font=dict(color='white', size=18))
+    fig.update_layout(hoverlabel=dict(bgcolor='darkseagreen', font_size=20, font_family="Lucida Console"))
+    fig.update_layout(title=dict(x=0.0, y=1.0, xanchor='left', yanchor='auto'))
     fig.update_layout(height=600)
 
     return fig
@@ -145,9 +121,9 @@ def apply_common_line_chart_features(fig):
 
 def get_card_content(card_header, card_paragraph, card_footer):
     card_content = [
-        dbc.CardHeader(card_header),
+        dbc.CardHeader(children=card_header),
         dbc.CardBody(
-            [
+            children=[
                 html.P(
                     card_paragraph,
                     className="card-text",
@@ -164,39 +140,29 @@ def get_card_content(card_header, card_paragraph, card_footer):
 
 
 def get_interval_timer():
-    return dcc.Interval(
-        id='interval-timer',
-        interval=1 * 1000,
-        n_intervals=0
-    )
+    return dcc.Interval(id='interval-timer', interval=1 * 1000, n_intervals=0)
 
 
 def get_interval_measurement():
-    return dcc.Interval(
-        id='interval-measurement',
-        interval=int(MEASUREMENT_INTERVAL),
-        n_intervals=0
-    )
+    return dcc.Interval(id='interval-measurement', interval=int(MEASUREMENT_INTERVAL), n_intervals=0)
 
 
 def get_navigation(active):
     children = [
-        dcc.Link(id='home', children='Start', href='/'),
-        dcc.Link(id='home', children='Opady', href='/apps/rainfall'),
-        dcc.Link(id='home', children='Temperatura', href='/apps/temperature'),
-        dcc.Link(id='home', children='Wilgotność', href='/apps/humidity'),
-        dcc.Link(id='home', children='Ciśnienie', href='/apps/pressure'),
-        dcc.Link(id='home', children='Wiatr', href='/apps/wind'),
+        dcc.Link(id='link-home', children='Start', href='/'),
+        dcc.Link(id='link-rainfall', children='Opady', href='/apps/rainfall'),
+        dcc.Link(id='link-temperature', children='Temperatura', href='/apps/temperature'),
+        dcc.Link(id='link-humidity', children='Wilgotność', href='/apps/humidity'),
+        dcc.Link(id='link-pressure', children='Ciśnienie', href='/apps/pressure'),
+        dcc.Link(id='link-wind', children='Wiatr', href='/apps/wind'),
     ]
 
     for c in children:
         if c.__getattribute__('children') == active:
             c.__setattr__('className', 'active')
+            break
 
-    return html.Div(
-        id="div-navigation",
-        children=children
-    )
+    return html.Div(id="div-navigation", children=children)
 
 
 def get_slider(id_postfix):
@@ -265,34 +231,33 @@ def get_slider_container_display():
         return {'display': 'block'}
 
 
-def get_div_warning(id_postfix):
-    return html.Div(
-        id=f"div-warning-{id_postfix}",
-        children="Oczekiwanie na pierwszy pomiar..."
-    )
+def get_warning(id_postfix):
+    return html.Div(id=f"div-warning-{id_postfix}", children="Oczekiwanie na pierwszy pomiar...")
 
 
-def get_div_timer(id_postfix):
-    return html.Div(
-        id=f"div-timer-{id_postfix}"
-    )
+def get_timer(id_postfix):
+    return html.Div(id=f"div-timer-{id_postfix}")
 
 
 def get_line_chart(id_postfix):
-    return html.Div(
-        id=f"div-line-chart-{id_postfix}",
-    )
+    return html.Div(id=f"div-line-chart-{id_postfix}")
 
 
 def get_div_current_measurement(id_postfix, card_color):
-    return html.Div(
-        className="cards-container",
-        children=dbc.Card(color=card_color, id=f'current-{id_postfix}')
-    )
+    return \
+        html.Div(
+            className="cards-container",
+            children=dbc.Card(color=card_color, id=f'current-{id_postfix}')
+        )
 
 
 def get_current_date():
-    return format_datetime(
-        datetime.now(pytz.timezone('Europe/Warsaw')),
-        format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
-    )
+    return \
+        format_datetime(
+            datetime=datetime.now(pytz.timezone('Europe/Warsaw')),
+            format="EEE, d MMMM yyyy, HH:mm:ss", locale='pl'
+        )
+
+
+def get_card(id, color):
+    return dbc.Card(id=id, color=color)

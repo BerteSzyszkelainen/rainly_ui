@@ -2,30 +2,42 @@ import pandas as pd
 import plotly.express as px
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from utilities.utilities import apply_common_line_chart_features, get_measurements, \
-    apply_common_chart_features, read_configuration, get_navigation, get_slider, \
-    get_current_measurement_card, get_slider_max_and_marks, get_slider_container_display, get_interval_timer, \
-    get_interval_measurement, get_div_warning, get_div_timer, get_line_chart, get_div_current_measurement, \
-    get_current_date
+from utilities.utilities import get_measurements
+from utilities.utilities import apply_common_line_chart_features
+from utilities.utilities import apply_common_chart_features
+from utilities.utilities import read_configuration
+from utilities.utilities import get_navigation
+from utilities.utilities import get_slider
+from utilities.utilities import get_current_measurement_card
+from utilities.utilities import get_slider_max_and_marks
+from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_interval_timer
+from utilities.utilities import get_interval_measurement
+from utilities.utilities import get_warning
+from utilities.utilities import get_timer
+from utilities.utilities import get_line_chart
+from utilities.utilities import get_div_current_measurement
+from utilities.utilities import get_current_date
 from app import app
+
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
-BACKGROUND_COLOR = "#5D5C61"
 
 
 layout = html.Div(
     id="div-root",
     children=[
-        get_div_timer(id_postfix='humidity'),
+        get_timer(id_postfix='humidity'),
         get_navigation(active='Wilgotność'),
         get_div_current_measurement(id_postfix='humidity', card_color='#00ccff'),
         get_slider(id_postfix='humidity'),
         get_line_chart(id_postfix='humidity'),
-        get_div_warning(id_postfix='humidity'),
+        get_warning(id_postfix='humidity'),
         get_interval_timer(),
         get_interval_measurement()
-])
+    ]
+)
 
 
 @app.callback(
@@ -35,11 +47,10 @@ layout = html.Div(
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_line_chart(day_count, n):
-
     df = get_measurements(day_count=day_count)
 
     if df.empty:
-        return {}, {'display': 'none'}
+        return [], {'display': 'none'}
     else:
         fig = px.line(df, x=df["date"].dt.strftime('%d.%m %H:%M'), y=df["humidity"])
         fig = apply_common_chart_features(fig)
@@ -57,18 +68,18 @@ def update_line_chart(day_count, n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
-
     df = pd.read_json(DATA_SOURCE)
 
     if df.empty:
         return {'display': 'block'}
+
 
 @app.callback(
     Output(component_id='current-humidity', component_property='children'),
     Input(component_id='interval-timer', component_property='n_intervals')
 )
 def update_current_humidity(n):
-    return get_current_measurement_card('humidity')
+    return get_current_measurement_card(measurement_name='humidity')
 
 
 @app.callback(

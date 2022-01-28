@@ -2,11 +2,22 @@ import pandas as pd
 import plotly.express as px
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from utilities.utilities import get_measurements, apply_common_line_chart_features, \
-    apply_common_chart_features, read_configuration, get_navigation, get_slider, \
-    get_current_measurement_card, get_slider_max_and_marks, get_slider_container_display, get_interval_timer, \
-    get_interval_measurement, get_div_warning, get_div_timer, get_line_chart, get_div_current_measurement, \
-    get_current_date
+from utilities.utilities import apply_common_line_chart_features
+from utilities.utilities import get_measurements
+from utilities.utilities import apply_common_chart_features
+from utilities.utilities import read_configuration
+from utilities.utilities import get_navigation
+from utilities.utilities import get_slider
+from utilities.utilities import get_current_measurement_card
+from utilities.utilities import get_slider_max_and_marks
+from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_interval_timer
+from utilities.utilities import get_warning
+from utilities.utilities import get_interval_measurement
+from utilities.utilities import get_timer
+from utilities.utilities import get_line_chart
+from utilities.utilities import get_div_current_measurement
+from utilities.utilities import get_current_date
 from app import app
 
 
@@ -17,15 +28,16 @@ DATA_SOURCE = CONFIG['DATA']['source']
 layout = html.Div(
     id="div-root",
     children=[
-        get_div_timer(id_postfix='temperature'),
+        get_timer(id_postfix='temperature'),
         get_navigation(active='Temperatura'),
         get_div_current_measurement(id_postfix='temperature', card_color='#f95959'),
         get_slider(id_postfix='temperature'),
         get_line_chart(id_postfix='temperature'),
-        get_div_warning(id_postfix='temperature'),
+        get_warning(id_postfix='temperature'),
         get_interval_timer(),
         get_interval_measurement()
-])
+    ]
+)
 
 
 @app.callback(
@@ -60,6 +72,7 @@ def update_warning(n):
 
     if df.empty:
         return {'display': 'block'}
+
 
 @app.callback(
     Output(component_id='current-temperature', component_property='children'),

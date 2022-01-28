@@ -1,10 +1,16 @@
 from dash import html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-
+from utilities.utilities import read_configuration
+from utilities.utilities import get_navigation
+from utilities.utilities import get_current_measurement_card
+from utilities.utilities import get_interval_timer
+from utilities.utilities import get_interval_measurement
+from utilities.utilities import get_timer
+from utilities.utilities import get_current_date
+from utilities.utilities import get_card
 from app import app
-from utilities.utilities import read_configuration, get_navigation, get_current_measurement_card, get_interval_timer, \
-    get_interval_measurement, get_div_timer, get_current_date
+
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
@@ -14,65 +20,30 @@ MEASUREMENT_INTERVAL = CONFIG['MEASUREMENT']['interval']
 layout = html.Div(
     id="div-root-home",
     children=[
-        get_div_timer(id_postfix='home'),
+        get_timer(id_postfix='home'),
         get_navigation(active='Start'),
         html.Div(
             className="cards-container",
             children=[
                 dbc.Row(
                     [
-                        dbc.Col(
-                            dbc.Card(
-                                color="#5585b5",
-                                id='current-rainfall-home'
-                            )
-                        ),
-                        dbc.Col(
-                            dbc.Card(
-                                color="#f95959",
-                                id='current-temperature-home'
-                            )
-                        ),
-                        dbc.Col(
-                            dbc.Card(
-                                color="#00ccff",
-                                id='current-humidity-home'
-                            )
-                        ),
+                        dbc.Col(dbc.Card(get_card(id='current-rainfall-home', color='#557A95'))),
+                        dbc.Col(dbc.Card(get_card(id='current-temperature-home', color='#f95959'))),
+                        dbc.Col(dbc.Card(get_card(id='current-humidity-home', color='#00ccff'))),
                     ],
                     className="mb-4",
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(
-                            dbc.Card(
-                                color="#f1b963",
-                                id='current-wind-avg-home'
-                            )
-                        ),
-                        dbc.Col(
-                            dbc.Card(
-                                color="#f1b963",
-                                id='current-wind-max-home'
-                            )
-                        ),
-                        dbc.Col(
-                            dbc.Card(
-                                color="#f1b963",
-                                id='current-wind-direction-home'
-                            )
-                        ),
+                        dbc.Col(dbc.Card(get_card(id='current-wind-avg-home', color='#f1b963'))),
+                        dbc.Col(dbc.Card(get_card(id='current-wind-max-home', color='#f1b963'))),
+                        dbc.Col(dbc.Card(get_card(id='current-wind-direction-home', color='#f1b963'))),
                     ],
                     className="mb-4",
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(
-                            dbc.Card(
-                                color="#ff8c69",
-                                id='current-pressure-home'
-                            )
-                        ),
+                        dbc.Col(dbc.Card(get_card(id='current-pressure-home', color='#ff8c69'))),
                     ],
                     className="mb-4",
                 ),
@@ -85,8 +56,8 @@ layout = html.Div(
 
 
 @app.callback(
-    Output('div-timer-home', 'children'),
-    Input('interval-timer', 'n_intervals')
+    Output(component_id='div-timer-home', component_property='children'),
+    Input(component_id='interval-timer', component_property='n_intervals')
 )
 def update_timer(n):
     return get_current_date()

@@ -3,38 +3,46 @@ import plotly.express as px
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-
-from utilities.utilities import get_rainfall_sum_per_day, apply_common_chart_features, \
-    get_total_rainfall_sum, read_configuration, get_navigation, get_slider, \
-    get_slider_max_and_marks, get_slider_container_display, get_current_measurement_card, get_interval_timer, \
-    get_interval_measurement, get_div_warning, get_div_timer, get_div_current_measurement, get_current_date
+from utilities.utilities import get_rainfall_sum_per_day
+from utilities.utilities import get_interval_timer
+from utilities.utilities import apply_common_chart_features
+from utilities.utilities import get_total_rainfall_sum
+from utilities.utilities import get_navigation
+from utilities.utilities import read_configuration
+from utilities.utilities import get_slider
+from utilities.utilities import get_slider_max_and_marks
+from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_current_measurement_card
+from utilities.utilities import get_interval_measurement
+from utilities.utilities import get_warning
+from utilities.utilities import get_timer
+from utilities.utilities import get_div_current_measurement
+from utilities.utilities import get_current_date
 from app import app
+
 
 CONFIG = read_configuration()
 DATA_SOURCE = CONFIG['DATA']['source']
-BACKGROUND_COLOR = "#5D5C61"
 
 
 layout = html.Div(
     id="div-root",
     children=[
-        get_div_timer(id_postfix='rainfall'),
+        get_timer(id_postfix='rainfall'),
         get_navigation(active='Opady'),
         get_div_current_measurement(id_postfix='rainfall', card_color='#557A95'),
         get_slider(id_postfix='rainfall'),
-        html.Div(
-            id="div-bar-chart-rainfall",
-            children=dcc.Loading(children=dcc.Graph(id="bar-chart-rainfall"))
-        ),
-        get_div_warning(id_postfix='rainfall'),
+        html.Div(id="div-bar-chart-rainfall"),
+        get_warning(id_postfix='rainfall'),
         get_interval_timer(),
         get_interval_measurement()
-])
+    ]
+)
 
 
 @app.callback(
-    Output(component_id='bar-chart-rainfall', component_property='figure'),
-    Output(component_id='bar-chart-rainfall', component_property='style'),
+    Output(component_id='div-bar-chart-rainfall', component_property='children'),
+    Output(component_id='div-bar-chart-rainfall', component_property='style'),
     Input(component_id='slider-rainfall', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
@@ -50,7 +58,7 @@ def update_bar_chart(day_count, n):
         fig.update_layout(yaxis_title="mm")
         fig.update_traces(marker_color='#557A95')
         fig.update_traces(hovertemplate="Data: %{x}<br>Suma opadów: %{y} mm")
-        return fig, {'display': 'block'}
+        return dcc.Loading(children=dcc.Graph(figure=fig)), {'display': 'block'}
 
 
 @app.callback(
