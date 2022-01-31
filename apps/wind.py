@@ -2,13 +2,12 @@ import pandas as pd
 from dash import html, dcc
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
-from utilities.utilities import degrees_to_compass, get_card
+from utilities.utilities import degrees_to_compass, get_card, get_card_children, get_last_measurement_time_and_value
 from utilities.utilities import get_measurements
-from utilities.utilities import apply_common_chart_features
+from utilities.utilities import add_common_chart_features
 from utilities.utilities import read_configuration
 from utilities.utilities import get_navigation
 from utilities.utilities import get_slider
-from utilities.utilities import get_current_measurement_card
 from utilities.utilities import get_slider_max_and_marks
 from utilities.utilities import get_slider_container_display
 from utilities.utilities import get_interval_timer
@@ -37,8 +36,7 @@ layout = html.Div(
                     dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#f1b963'))),
                     dbc.Col(dbc.Card(get_card(id='current-wind-max', color='#f1b963'))),
                     dbc.Col(dbc.Card(get_card(id='current-wind-direction', color='#f1b963'))),
-                ],
-                className="mb-4",
+                ]
             )
         ),
         get_slider(id_postfix='wind'),
@@ -101,7 +99,7 @@ def update_line_chart(day_count, n):
             )
         )
 
-        fig = apply_common_chart_features(fig)
+        fig = add_common_chart_features(fig)
         fig.update_layout(showlegend=True)
         fig.update_layout(yaxis_range=[0, 150])
         fig.update_layout(yaxis_title="km/h")
@@ -128,10 +126,25 @@ def update_warning(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_wind(n):
+    time, wind_speed_avg = get_last_measurement_time_and_value(measurement_name='wind_speed_avg')
+    _, wind_speed_max = get_last_measurement_time_and_value(measurement_name='wind_speed_max')
+    _, wind_direction = get_last_measurement_time_and_value(measurement_name='wind_direction')
     return [
-        get_current_measurement_card(measurement_name='wind_speed_avg', card_header="Prędkość śr."),
-        get_current_measurement_card(measurement_name='wind_speed_max', card_header="Prędkość max."),
-        get_current_measurement_card(measurement_name='wind_direction', card_header="Kierunek")
+        get_card_children(
+            card_header='Prędkość śr.',
+            card_paragraph=f'{wind_speed_avg} km/h',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Prędkość maks.',
+            card_paragraph=f'{wind_speed_max} km/h',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Kierunek',
+            card_paragraph=f'{wind_direction}',
+            card_footer=f'Czas pomiaru: {time}'
+        )
     ]
 
 

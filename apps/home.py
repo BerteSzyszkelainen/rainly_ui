@@ -1,9 +1,9 @@
 from dash import html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-from utilities.utilities import read_configuration
+from utilities.utilities import read_configuration, get_card_children, get_last_measurement_time_and_value, \
+    get_rainfall_sum_24h
 from utilities.utilities import get_navigation
-from utilities.utilities import get_current_measurement_card
 from utilities.utilities import get_interval_timer
 from utilities.utilities import get_interval_measurement
 from utilities.utilities import get_timer
@@ -74,12 +74,48 @@ def update_timer(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_measurements(n):
+    time, temperature = get_last_measurement_time_and_value(measurement_name='temperature')
+    _, humidity = get_last_measurement_time_and_value(measurement_name='humidity')
+    _, pressure = get_last_measurement_time_and_value(measurement_name='pressure')
+    _, wind_speed_avg = get_last_measurement_time_and_value(measurement_name='wind_speed_avg')
+    _, wind_speed_max = get_last_measurement_time_and_value(measurement_name='wind_speed_max')
+    _, wind_direction = get_last_measurement_time_and_value(measurement_name='wind_direction')
+    rainfall_sum_24h = get_rainfall_sum_24h()
+
     return [
-        get_current_measurement_card(card_header="Temperatura", measurement_name='temperature'),
-        get_current_measurement_card(card_header="Wilgotność", measurement_name='humidity'),
-        get_current_measurement_card(card_header="Ciśnienie", measurement_name='pressure'),
-        get_current_measurement_card(card_header="Opady 24h", measurement_name='rainfall'),
-        get_current_measurement_card(card_header="Wiatr prędkość śr.", measurement_name='wind_speed_avg'),
-        get_current_measurement_card(card_header="Wiatr prędkość maks.", measurement_name='wind_speed_max'),
-        get_current_measurement_card(card_header="Wiatr kierunek", measurement_name='wind_direction'),
+        get_card_children(
+            card_header='Temperatura',
+            card_paragraph=f'{temperature} °C',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Wilgotność',
+            card_paragraph=f'{humidity} %',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Ciśnienie',
+            card_paragraph=f'{pressure} hPa',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Opady 24h',
+            card_paragraph=f'{rainfall_sum_24h} mm',
+            card_footer=f'Czas pomiaru: ostatnie 24h'
+        ),
+        get_card_children(
+            card_header='Wiatr prędkość śr.',
+            card_paragraph=f'{wind_speed_avg} km/h',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Wiatr prędkość maks.',
+            card_paragraph=f'{wind_speed_max} km/h',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Wiatr kierunek.',
+            card_paragraph=f'{wind_direction}',
+            card_footer=f'Czas pomiaru: {time}'
+        )
     ]

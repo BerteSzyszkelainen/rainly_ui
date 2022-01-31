@@ -3,20 +3,19 @@ import plotly.express as px
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import get_rainfall_sum_per_day
+from utilities.utilities import get_rainfall_sum_per_day, get_rainfall_sum_24h, get_card_children
 from utilities.utilities import get_interval_timer
-from utilities.utilities import apply_common_chart_features
+from utilities.utilities import add_common_chart_features
 from utilities.utilities import get_total_rainfall_sum
 from utilities.utilities import get_navigation
 from utilities.utilities import read_configuration
 from utilities.utilities import get_slider
 from utilities.utilities import get_slider_max_and_marks
 from utilities.utilities import get_slider_container_display
-from utilities.utilities import get_current_measurement_card
 from utilities.utilities import get_interval_measurement
 from utilities.utilities import get_warning
 from utilities.utilities import get_timer
-from utilities.utilities import get_div_current_measurement
+from utilities.utilities import get_current_measurement
 from utilities.utilities import get_current_date
 from app import app
 
@@ -30,7 +29,7 @@ layout = html.Div(
     children=[
         get_timer(id_postfix='rainfall'),
         get_navigation(active='Opady'),
-        get_div_current_measurement(id_postfix='rainfall', card_color='#557A95'),
+        get_current_measurement(id_postfix='rainfall', card_color='#557A95'),
         get_slider(id_postfix='rainfall'),
         html.Div(id="div-bar-chart-rainfall"),
         get_warning(id_postfix='rainfall'),
@@ -53,7 +52,7 @@ def update_bar_chart(day_count, n):
         return {}, {'display': 'none'}
     else:
         fig = px.bar(df, x=df["day"] + '.' + df["month"], y=df["rainfall"])
-        fig = apply_common_chart_features(fig)
+        fig = add_common_chart_features(fig)
         fig.update_layout(yaxis_autorange=True)
         fig.update_layout(yaxis_title="mm")
         fig.update_traces(marker_color='#557A95')
@@ -76,7 +75,12 @@ def update_warning(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_rainfall_24h(n):
-    return get_current_measurement_card(card_header="Ostatnie 24h", measurement_name='rainfall')
+    rainfall_sum_24h = get_rainfall_sum_24h()
+    return get_card_children(
+            card_header='Ostatnie 24h',
+            card_paragraph=f'{rainfall_sum_24h} mm',
+            card_footer=f'Czas pomiaru: ostatnie 24h'
+    )
 
 
 @app.callback(
