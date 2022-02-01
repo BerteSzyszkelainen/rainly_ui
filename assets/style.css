@@ -38,16 +38,12 @@ body {
     display: none;
 }
 
-[id^=current] {
-    font-size: 17px;
-}
-
 [id^=div-slider] {
     text-align: left;
     position: center;
     margin: 0 auto;
     width: 80%;
-    font-size: 30px;
+    font-size: 20px;
     margin-bottom: 20px;
 }
 
@@ -83,8 +79,4 @@ body {
 #div-navigation [id^=link].active {
   background-color: #04AA6D;
   color: white;
-}
-
-.cards-container {
-  margin: 4%;
 }

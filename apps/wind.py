@@ -9,7 +9,7 @@ from utilities.utilities import read_configuration
 from utilities.utilities import get_navigation
 from utilities.utilities import get_slider
 from utilities.utilities import get_slider_max_and_marks
-from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_style_display
 from utilities.utilities import get_interval_timer
 from utilities.utilities import get_warning
 from utilities.utilities import get_interval_measurement
@@ -30,7 +30,7 @@ layout = html.Div(
         get_timer(id_postfix='wind'),
         get_navigation(active='Wiatr'),
         html.Div(
-            className="cards-container",
+            id="div-current-wind",
             children=dbc.Row(
                 children=[
                     dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#f1b963'))),
@@ -89,7 +89,7 @@ def update_line_chart(day_count, n):
                 y=df["wind_speed_max"] + 20,
                 name="kierunek",
                 mode="markers+text",
-                text=df["wind_speed_max"].apply(lambda x: degrees_to_compass(x)),
+                text=df["wind_direction"].apply(lambda x: degrees_to_compass(x)),
                 textposition="top center",
                 textfont={
                     'size': 12,
@@ -123,12 +123,15 @@ def update_warning(n):
     Output(component_id='current-wind-avg', component_property='children'),
     Output(component_id='current-wind-max', component_property='children'),
     Output(component_id='current-wind-direction', component_property='children'),
+    Output(component_id='div-current-wind', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_wind(n):
     time, wind_speed_avg = get_last_measurement_time_and_value(measurement_name='wind_speed_avg')
     _, wind_speed_max = get_last_measurement_time_and_value(measurement_name='wind_speed_max')
     _, wind_direction = get_last_measurement_time_and_value(measurement_name='wind_direction')
+    wind_direction = degrees_to_compass(wind_direction)
+    style_display = get_style_display()
     return [
         get_card_children(
             card_header='Prędkość śr.',
@@ -144,7 +147,8 @@ def update_current_wind(n):
             card_header='Kierunek',
             card_paragraph=f'{wind_direction}',
             card_footer=f'Czas pomiaru: {time}'
-        )
+        ),
+        style_display
     ]
 
 
@@ -156,7 +160,7 @@ def update_current_wind(n):
 )
 def update_slider(n):
     slider_max, slider_marks = get_slider_max_and_marks()
-    slider_container_display = get_slider_container_display()
+    slider_container_display = get_style_display()
     return slider_max, slider_marks, slider_container_display
 
 

@@ -11,7 +11,7 @@ from utilities.utilities import get_navigation
 from utilities.utilities import read_configuration
 from utilities.utilities import get_slider
 from utilities.utilities import get_slider_max_and_marks
-from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_style_display
 from utilities.utilities import get_interval_measurement
 from utilities.utilities import get_warning
 from utilities.utilities import get_timer
@@ -31,6 +31,7 @@ layout = html.Div(
         get_navigation(active='Opady'),
         get_current_measurement(id_postfix='rainfall', card_color='#557A95'),
         get_slider(id_postfix='rainfall'),
+        html.Div(id='slider-rainfall-output'),
         html.Div(id="div-bar-chart-rainfall"),
         get_warning(id_postfix='rainfall'),
         get_interval_timer(),
@@ -72,15 +73,17 @@ def update_warning(n):
 
 @app.callback(
     Output(component_id='current-rainfall', component_property='children'),
+    Output(component_id='div-current-rainfall', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_rainfall_24h(n):
     rainfall_sum_24h = get_rainfall_sum_24h()
+    style_display = get_style_display()
     return get_card_children(
-            card_header='Ostatnie 24h',
-            card_paragraph=f'{rainfall_sum_24h} mm',
-            card_footer=f'Czas pomiaru: ostatnie 24h'
-    )
+        card_header='Ostatnie 24h',
+        card_paragraph=f'{rainfall_sum_24h} mm',
+        card_footer=f'Czas pomiaru: ostatnie 24h'
+    ), style_display
 
 
 @app.callback(
@@ -91,7 +94,7 @@ def update_rainfall_24h(n):
 )
 def update_slider(n):
     slider_max, slider_marks = get_slider_max_and_marks()
-    slider_container_display = get_slider_container_display()
+    slider_container_display = get_style_display()
     return slider_max, slider_marks, slider_container_display
 
 
@@ -103,8 +106,8 @@ def update_timer(n):
     return get_current_date()
 
 @app.callback(
-    Output('slider-rainfall-output', 'children'),
-    Input('slider-rainfall', 'value')
+    Output(component_id='slider-rainfall-output', component_property='children'),
+    Input(component_id='slider-rainfall', component_property='value')
 )
 def update_total_rainfall_sum(day_count):
     rainfall_sum = get_total_rainfall_sum(day_count)

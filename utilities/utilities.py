@@ -110,8 +110,8 @@ def add_common_line_chart_features(fig):
 
 def get_card_children(card_header, card_paragraph, card_footer):
     card_children = [
-        dbc.CardHeader(children=card_header),
-        dbc.CardBody(children=html.P(card_paragraph, className='card-text')),
+        dbc.CardHeader(children=card_header, style={'font-size': '16px', 'padding': '5px', 'color': 'white'}),
+        dbc.CardBody(children=card_paragraph, style={'font-size': '31px', 'padding': '5px', 'color': 'white'}),
         dbc.CardFooter(children=card_footer, style={'font-size': '12px', 'padding': '5px', 'color': 'white'})
     ]
 
@@ -157,7 +157,7 @@ def get_slider(id_postfix):
                 dcc.Slider(
                     id=f'slider-{id_postfix}',
                     min=1,
-                    value=7,
+                    value=1,
                 )
             ]
         )
@@ -181,7 +181,7 @@ def get_slider_max_and_marks():
         return slider_max, generate_slider_marks(slider_max, tick_postfix='d')
 
 
-def get_slider_container_display():
+def get_style_display():
     df = pd.read_json(DATA_SOURCE)
 
     if df.empty:
@@ -205,8 +205,12 @@ def get_line_chart(id_postfix):
 def get_current_measurement(id_postfix, card_color):
     return \
         html.Div(
-            className='cards-container',
-            children=dbc.Card(color=card_color, id=f'current-{id_postfix}')
+            id=f'div-current-{id_postfix}',
+            children=dbc.Card(
+                color=card_color,
+                id=f'current-{id_postfix}',
+                style={"width": "24rem", 'margin': '0 auto', 'float': 'none'}
+            )
         )
 
 

@@ -2,14 +2,16 @@ import pandas as pd
 import plotly.express as px
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from utilities.utilities import add_common_line_chart_features, get_last_measurement_time_and_value, get_card_children
+from utilities.utilities import add_common_line_chart_features
+from utilities.utilities import get_last_measurement_time_and_value
+from utilities.utilities import get_card_children
 from utilities.utilities import get_measurements
 from utilities.utilities import add_common_chart_features
 from utilities.utilities import read_configuration
 from utilities.utilities import get_navigation
 from utilities.utilities import get_slider
 from utilities.utilities import get_slider_max_and_marks
-from utilities.utilities import get_slider_container_display
+from utilities.utilities import get_style_display
 from utilities.utilities import get_interval_timer
 from utilities.utilities import get_warning
 from utilities.utilities import get_interval_measurement
@@ -75,15 +77,17 @@ def update_warning(n):
 
 @app.callback(
     Output(component_id='current-temperature', component_property='children'),
+    Output(component_id='div-current-temperature', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_temperature(n):
     time, temperature = get_last_measurement_time_and_value(measurement_name='temperature')
+    style_display = get_style_display()
     return get_card_children(
-            card_header='Aktualnie',
-            card_paragraph=f'{temperature} °C',
-            card_footer=f'Czas pomiaru: {time}'
-    )
+        card_header='Aktualnie',
+        card_paragraph=f'{round(temperature, 1)} °C',
+        card_footer=f'Czas pomiaru: {time}'
+    ), style_display
 
 
 @app.callback(
@@ -94,7 +98,7 @@ def update_current_temperature(n):
 )
 def update_slider(n):
     slider_max, slider_marks = get_slider_max_and_marks()
-    slider_container_display = get_slider_container_display()
+    slider_container_display = get_style_display()
     return slider_max, slider_marks, slider_container_display
 
 
