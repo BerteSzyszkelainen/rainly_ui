@@ -110,9 +110,9 @@ def add_common_line_chart_features(fig):
 
 def get_card_children(card_header, card_paragraph, card_footer):
     card_children = [
-        dbc.CardHeader(children=card_header, style={'font-size': '16px', 'padding': '5px', 'color': 'white'}),
-        dbc.CardBody(children=card_paragraph, style={'font-size': '31px', 'padding': '5px', 'color': 'white'}),
-        dbc.CardFooter(children=card_footer, style={'font-size': '12px', 'padding': '5px', 'color': 'white'})
+        dbc.CardHeader(children=card_header, style={'font-size': '15px', 'padding': '4px', 'color': 'white'}),
+        dbc.CardBody(children=card_paragraph, style={'font-size': '30px', 'padding': '4px', 'color': 'white'}),
+        dbc.CardFooter(children=card_footer, style={'font-size': '12px', 'padding': '4px', 'color': 'white'})
     ]
 
     return card_children

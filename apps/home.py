@@ -32,7 +32,7 @@ layout = html.Div(
                         dbc.Col(dbc.Card(get_card(id='current-temperature-home', color='#f95959'))),
                         dbc.Col(dbc.Card(get_card(id='current-humidity-home', color='#00ccff'))),
                     ],
-                    className="mb-4",
+                    className="mb-3",
                     style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
                 ),
                 dbc.Row(
@@ -41,7 +41,7 @@ layout = html.Div(
                         dbc.Col(dbc.Card(get_card(id='current-wind-max-home', color='#f1b963'))),
                         dbc.Col(dbc.Card(get_card(id='current-wind-direction-home', color='#f1b963'))),
                     ],
-                    className="mb-4",
+                    className="mb-3",
                     style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
                 ),
                 dbc.Row(
