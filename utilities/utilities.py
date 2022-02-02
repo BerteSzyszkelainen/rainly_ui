@@ -209,7 +209,8 @@ def get_current_measurement(id_postfix, card_color):
             children=dbc.Card(
                 color=card_color,
                 id=f'current-{id_postfix}',
-                style={"width": "24rem", 'margin': '0 auto', 'float': 'none'}
+                style={"width": "20rem", 'margin': '0 auto', 'float': 'none'},
+                className="mb-5",
             )
         )
 

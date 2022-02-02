@@ -36,7 +36,9 @@ layout = html.Div(
                     dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#f1b963'))),
                     dbc.Col(dbc.Card(get_card(id='current-wind-max', color='#f1b963'))),
                     dbc.Col(dbc.Card(get_card(id='current-wind-direction', color='#f1b963'))),
-                ]
+                ],
+                className="mb-5",
+                style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
             )
         ),
         get_slider(id_postfix='wind'),
