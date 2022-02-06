@@ -1,8 +1,13 @@
 from dash import html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input
+from dash.dependencies import Output
 import dash_bootstrap_components as dbc
-from utilities.utilities import read_configuration, get_card_children, get_last_measurement_time_and_value, \
-    get_rainfall_sum_24h, degrees_to_compass, get_style_display, get_warning
+from utilities.utilities import read_configuration
+from utilities.utilities import get_card_children
+from utilities.utilities import get_last_measurement_time_and_value
+from utilities.utilities import get_rainfall_sum_24h
+from utilities.utilities import get_style_display
+from utilities.utilities import get_warning
 from utilities.utilities import get_navigation
 from utilities.utilities import get_interval_timer
 from utilities.utilities import get_interval_measurement
@@ -47,8 +52,11 @@ layout = html.Div(
                 dbc.Row(
                     [
                         dbc.Col(dbc.Card(get_card(id='current-pressure-home', color='#ff8c69'))),
+                        dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-two-five-home', color='#D39CB6'))),
+                        dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-ten-home', color='#F6D5C2'))),
                     ],
-                    style={"width": "20rem", 'margin': '0 auto', 'float': 'none'}
+                    className="mb-3",
+                    style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
                 ),
             ],
         ),
@@ -75,6 +83,8 @@ def update_timer(n):
     Output(component_id='current-wind-avg-home', component_property='children'),
     Output(component_id='current-wind-max-home', component_property='children'),
     Output(component_id='current-wind-direction-home', component_property='children'),
+    Output(component_id='current-air-quality-pm-two-five-home', component_property='children'),
+    Output(component_id='current-air-quality-pm-ten-home', component_property='children'),
     Output(component_id='div-current-measurements', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
@@ -85,7 +95,8 @@ def update_current_measurements(n):
     _, wind_speed_avg = get_last_measurement_time_and_value(measurement_name='wind_speed_avg')
     _, wind_speed_max = get_last_measurement_time_and_value(measurement_name='wind_speed_max')
     _, wind_direction = get_last_measurement_time_and_value(measurement_name='wind_direction')
-    wind_direction = degrees_to_compass(wind_direction)
+    _, pm_two_five = get_last_measurement_time_and_value(measurement_name='pm_two_five')
+    _, pm_ten = get_last_measurement_time_and_value(measurement_name='pm_ten')
     rainfall_sum_24h = get_rainfall_sum_24h()
     style_display = get_style_display()
 
@@ -123,6 +134,16 @@ def update_current_measurements(n):
         get_card_children(
             card_header='Wiatr kierunek',
             card_paragraph=f'{wind_direction}',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Cząsteczki PM2.5',
+            card_paragraph=f'{pm_two_five} mikrograma/m3',
+            card_footer=f'Czas pomiaru: {time}'
+        ),
+        get_card_children(
+            card_header='Cząsteczki PM10',
+            card_paragraph=f'{pm_ten} mikrograma/m3',
             card_footer=f'Czas pomiaru: {time}'
         ),
         style_display

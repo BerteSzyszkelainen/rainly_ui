@@ -1,9 +1,16 @@
 from dash import dcc
 from dash import html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input
+from dash.dependencies import Output
 
 from app import app, server
-from apps import rainfall, humidity, home, temperature, pressure, wind
+from apps import rainfall
+from apps import humidity
+from apps import home
+from apps import temperature
+from apps import pressure
+from apps import wind
+from apps import air_quality
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -26,6 +33,8 @@ def display_page(pathname):
         return pressure.layout
     elif pathname == '/apps/wind':
         return wind.layout
+    elif pathname == '/apps/air_quality':
+        return air_quality.layout
     else:
         return '404'
 

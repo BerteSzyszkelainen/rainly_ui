@@ -3,7 +3,9 @@ import plotly.express as px
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from utilities.utilities import get_rainfall_sum_per_day, get_rainfall_sum_24h, get_card_children
+from utilities.utilities import get_rainfall_sum_per_day
+from utilities.utilities import get_rainfall_sum_24h
+from utilities.utilities import get_card_children
 from utilities.utilities import get_interval_timer
 from utilities.utilities import add_common_chart_features
 from utilities.utilities import get_total_rainfall_sum

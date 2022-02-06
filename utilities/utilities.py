@@ -65,12 +65,6 @@ def get_rainfall_sum_24h():
     return rainfall_sum
 
 
-def degrees_to_compass(degrees):
-    val = int((degrees / 22.5) + .5)
-    arr = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
-    return arr[(val % 16)]
-
-
 def get_measurements(day_count):
     df = pd.read_json(DATA_SOURCE)
     start_date = (datetime.now() - relativedelta(days=day_count - 1)) \
@@ -138,6 +132,7 @@ def get_navigation(active):
         dcc.Link(id='link-humidity', children='Wilgotność', href='/apps/humidity'),
         dcc.Link(id='link-pressure', children='Ciśnienie', href='/apps/pressure'),
         dcc.Link(id='link-wind', children='Wiatr', href='/apps/wind'),
+        dcc.Link(id='link-air-quality', children='Jakość powietrza', href='/apps/air_quality'),
     ]
 
     for c in children:

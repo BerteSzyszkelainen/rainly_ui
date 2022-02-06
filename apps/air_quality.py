@@ -29,23 +29,22 @@ DATA_SOURCE = CONFIG['DATA']['source']
 layout = html.Div(
     id="div-root",
     children=[
-        get_timer(id_postfix='wind'),
-        get_navigation(active='Wiatr'),
+        get_timer(id_postfix='air-quality'),
+        get_navigation(active='Jakość powietrza'),
         html.Div(
-            id="div-current-wind",
+            id="div-current-air-quality",
             children=dbc.Row(
                 children=[
-                    dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#f1b963'))),
-                    dbc.Col(dbc.Card(get_card(id='current-wind-max', color='#f1b963'))),
-                    dbc.Col(dbc.Card(get_card(id='current-wind-direction', color='#f1b963'))),
+                    dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-two-five', color='#D39CB6'))),
+                    dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-ten', color='#F6D5C2'))),
                 ],
                 className="mb-5",
                 style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
             )
         ),
-        get_slider(id_postfix='wind'),
-        get_line_chart(id_postfix='wind'),
-        get_warning(id_postfix='wind'),
+        get_slider(id_postfix='air-quality'),
+        get_line_chart(id_postfix='air-quality'),
+        get_warning(id_postfix='air-quality'),
         get_interval_timer(),
         get_interval_measurement()
     ]
@@ -53,9 +52,9 @@ layout = html.Div(
 
 
 @app.callback(
-    Output(component_id='div-line-chart-wind', component_property='children'),
-    Output(component_id='div-line-chart-wind', component_property='style'),
-    Input(component_id='slider-wind', component_property='value'),
+    Output(component_id='div-line-chart-air-quality', component_property='children'),
+    Output(component_id='div-line-chart-air-quality', component_property='style'),
+    Input(component_id='slider-air-quality', component_property='value'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_line_chart(day_count, n):
@@ -70,50 +69,36 @@ def update_line_chart(day_count, n):
         fig.add_trace(
             go.Scatter(
                 x=df["date"].dt.strftime(date_format),
-                y=df["wind_speed_avg"],
-                name="prędkość śr.",
+                y=df["pm_two_five"],
+                name="Cząsteczki PM2.5",
                 mode='lines+markers',
-                marker={'size': 8}
+                line={'color': '#D39CB6'},
+                marker={'size': 8, 'color': ['#D39CB6' for item in df["pm_two_five"]]},
             )
         )
 
         fig.add_trace(
             go.Scatter(
                 x=df["date"].dt.strftime(date_format),
-                y=df["wind_speed_max"],
-                name="prędkość maks.",
+                y=df["pm_ten"],
+                name="Cząsteczki PM10.0",
                 mode='lines+markers',
-                marker={'size': 8}
-            )
-        )
-
-        fig.add_trace(
-            go.Scatter(
-                x=df["date"].dt.strftime(date_format),
-                y=df["wind_speed_max"] + 20,
-                name="kierunek",
-                mode="markers+text",
-                text=df["wind_direction"],
-                textposition="top center",
-                textfont={
-                    'size': 12,
-                    'color': 'white'
-                },
-                marker={'size': 8}
+                line={'color': '#F6D5C2'},
+                marker={'size': 8, 'color': ['#F6D5C2' for item in df["pm_ten"]]},
             )
         )
 
         fig = add_common_chart_features(fig)
         fig.update_layout(showlegend=True)
-        fig.update_layout(yaxis_range=[0, 150])
-        fig.update_layout(yaxis_title="km/h")
-        fig.update_traces(hovertemplate="Data: %{x}<br>%{y} km/h <extra></extra>")
+        fig.update_layout(yaxis=dict(autorange=True))
+        fig.update_layout(yaxis_title="mikrogram/m3")
+        fig.update_traces(hovertemplate="Data: %{x}<br>%{y} mikrograma/m3 <extra></extra>")
 
         return dcc.Loading(children=dcc.Graph(figure=fig)), {'display': 'block'}
 
 
 @app.callback(
-    Output(component_id='div-warning-wind', component_property='style'),
+    Output(component_id='div-warning-air-quality', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_warning(n):
@@ -124,31 +109,24 @@ def update_warning(n):
 
 
 @app.callback(
-    Output(component_id='current-wind-avg', component_property='children'),
-    Output(component_id='current-wind-max', component_property='children'),
-    Output(component_id='current-wind-direction', component_property='children'),
-    Output(component_id='div-current-wind', component_property='style'),
+    Output(component_id='current-air-quality-pm-two-five', component_property='children'),
+    Output(component_id='current-air-quality-pm-ten', component_property='children'),
+    Output(component_id='div-current-air-quality', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_current_wind(n):
-    time, wind_speed_avg = get_last_measurement_time_and_value(measurement_name='wind_speed_avg')
-    _, wind_speed_max = get_last_measurement_time_and_value(measurement_name='wind_speed_max')
-    _, wind_direction = get_last_measurement_time_and_value(measurement_name='wind_direction')
+    time, pm_two_five = get_last_measurement_time_and_value(measurement_name='pm_two_five')
+    _, pm_ten = get_last_measurement_time_and_value(measurement_name='pm_ten')
     style_display = get_style_display()
     return [
         get_card_children(
-            card_header='Prędkość śr.',
-            card_paragraph=f'{wind_speed_avg} km/h',
+            card_header='Cząsteczki PM2.5',
+            card_paragraph=f'{pm_two_five} mikrograma/m3',
             card_footer=f'Czas pomiaru: {time}'
         ),
         get_card_children(
-            card_header='Prędkość maks.',
-            card_paragraph=f'{wind_speed_max} km/h',
-            card_footer=f'Czas pomiaru: {time}'
-        ),
-        get_card_children(
-            card_header='Kierunek',
-            card_paragraph=f'{wind_direction}',
+            card_header='Cząsteczki PM10',
+            card_paragraph=f'{pm_ten} mikrograma/m3',
             card_footer=f'Czas pomiaru: {time}'
         ),
         style_display
@@ -156,9 +134,9 @@ def update_current_wind(n):
 
 
 @app.callback(
-    Output(component_id='slider-wind', component_property='max'),
-    Output(component_id='slider-wind', component_property='marks'),
-    Output(component_id='div-slider-wind', component_property='style'),
+    Output(component_id='slider-air-quality', component_property='max'),
+    Output(component_id='slider-air-quality', component_property='marks'),
+    Output(component_id='div-slider-air-quality', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_slider(n):
@@ -168,7 +146,7 @@ def update_slider(n):
 
 
 @app.callback(
-    Output('div-timer-wind', 'children'),
+    Output('div-timer-air-quality', 'children'),
     Input('interval-timer', 'n_intervals')
 )
 def update_timer(n):

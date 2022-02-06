@@ -2,7 +2,9 @@ import pandas as pd
 import plotly.express as px
 from dash import html, dcc
 from dash.dependencies import Input, Output
-from utilities.utilities import get_measurements, get_card_children, get_last_measurement_time_and_value
+from utilities.utilities import get_measurements
+from utilities.utilities import get_card_children
+from utilities.utilities import get_last_measurement_time_and_value
 from utilities.utilities import add_common_line_chart_features
 from utilities.utilities import add_common_chart_features
 from utilities.utilities import read_configuration
