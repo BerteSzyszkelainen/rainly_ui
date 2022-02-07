@@ -85,7 +85,7 @@ def update_current_pressure(n):
     style_display = get_style_display()
     return get_card_children(
         card_header='Aktualnie',
-        card_paragraph=f'{pressure} hPa',
+        card_paragraph=f'{round(pressure, 1)} hPa',
         card_footer=f'Czas pomiaru: {time}'
     ), style_display
 

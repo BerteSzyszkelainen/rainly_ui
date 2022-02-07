@@ -35,9 +35,9 @@ layout = html.Div(
             id="div-current-wind",
             children=dbc.Row(
                 children=[
-                    dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#f1b963'))),
-                    dbc.Col(dbc.Card(get_card(id='current-wind-max', color='#f1b963'))),
-                    dbc.Col(dbc.Card(get_card(id='current-wind-direction', color='#f1b963'))),
+                    dbc.Col(dbc.Card(get_card(id='current-wind-avg', color='#E2B864'))),
+                    dbc.Col(dbc.Card(get_card(id='current-wind-max', color='#E2B864'))),
+                    dbc.Col(dbc.Card(get_card(id='current-wind-direction', color='#EAA42E'))),
                 ],
                 className="mb-5",
                 style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
@@ -138,12 +138,12 @@ def update_current_wind(n):
     return [
         get_card_children(
             card_header='Prędkość śr.',
-            card_paragraph=f'{wind_speed_avg} km/h',
+            card_paragraph=f'{round(wind_speed_avg, 1)} km/h',
             card_footer=f'Czas pomiaru: {time}'
         ),
         get_card_children(
             card_header='Prędkość maks.',
-            card_paragraph=f'{wind_speed_max} km/h',
+            card_paragraph=f'{round(wind_speed_max, 1)} km/h',
             card_footer=f'Czas pomiaru: {time}'
         ),
         get_card_children(

@@ -79,7 +79,7 @@ def update_warning(n):
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
 def update_rainfall_24h(n):
-    rainfall_sum_24h = get_rainfall_sum_24h()
+    rainfall_sum_24h = round(get_rainfall_sum_24h(), 1)
     style_display = get_style_display()
     return get_card_children(
         card_header='Ostatnie 24h',

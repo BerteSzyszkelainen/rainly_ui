@@ -36,7 +36,7 @@ layout = html.Div(
             children=dbc.Row(
                 children=[
                     dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-two-five', color='#D39CB6'))),
-                    dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-ten', color='#F6D5C2'))),
+                    dbc.Col(dbc.Card(get_card(id='current-air-quality-pm-ten', color='#755F91'))),
                 ],
                 className="mb-5",
                 style={"width": "60rem", 'margin': '0 auto', 'float': 'none'}
@@ -83,14 +83,14 @@ def update_line_chart(day_count, n):
                 y=df["pm_ten"],
                 name="Cząsteczki PM10.0",
                 mode='lines+markers',
-                line={'color': '#F6D5C2'},
-                marker={'size': 8, 'color': ['#F6D5C2' for item in df["pm_ten"]]},
+                line={'color': '#755F91'},
+                marker={'size': 8, 'color': ['#755F91' for item in df["pm_ten"]]},
             )
         )
 
         fig = add_common_chart_features(fig)
         fig.update_layout(showlegend=True)
-        fig.update_layout(yaxis=dict(autorange=True))
+        fig.update_layout(yaxis_range=[0, 20])
         fig.update_layout(yaxis_title="mikrogram/m3")
         fig.update_traces(hovertemplate="Data: %{x}<br>%{y} mikrograma/m3 <extra></extra>")
 
@@ -114,19 +114,19 @@ def update_warning(n):
     Output(component_id='div-current-air-quality', component_property='style'),
     Input(component_id='interval-measurement', component_property='n_intervals')
 )
-def update_current_wind(n):
+def update_current_air_quality(n):
     time, pm_two_five = get_last_measurement_time_and_value(measurement_name='pm_two_five')
     _, pm_ten = get_last_measurement_time_and_value(measurement_name='pm_ten')
     style_display = get_style_display()
     return [
         get_card_children(
             card_header='Cząsteczki PM2.5',
-            card_paragraph=f'{pm_two_five} mikrograma/m3',
+            card_paragraph=f'{round(pm_two_five, 1)} mikrograma/m3',
             card_footer=f'Czas pomiaru: {time}'
         ),
         get_card_children(
             card_header='Cząsteczki PM10',
-            card_paragraph=f'{pm_ten} mikrograma/m3',
+            card_paragraph=f'{round(pm_ten, 1)} mikrograma/m3',
             card_footer=f'Czas pomiaru: {time}'
         ),
         style_display

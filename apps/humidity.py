@@ -85,7 +85,7 @@ def update_current_humidity(n):
     style_display = get_style_display()
     return get_card_children(
         card_header='Aktualnie',
-        card_paragraph=f'{humidity} %',
+        card_paragraph=f'{round(humidity, 1)} %',
         card_footer=f'Czas pomiaru: {time}'
     ), style_display
 
